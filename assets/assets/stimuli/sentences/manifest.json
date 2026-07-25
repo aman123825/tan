@@ -1,0 +1,82 @@
+[
+  {
+    "id": "s1",
+    "text": "the boy runs home",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s1.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s2",
+    "text": "she reads a book",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s2.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s3",
+    "text": "the dog is black",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s3.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s4",
+    "text": "we eat rice today",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s4.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s5",
+    "text": "open the red door",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s5.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s6",
+    "text": "birds fly very high",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s6.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s7",
+    "text": "he drinks cold water",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s7.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s8",
+    "text": "the sun is bright",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s8.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s9",
+    "text": "put the cup down",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s9.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "s10",
+    "text": "they walk to school",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "s10.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "digit_0",
+    "text": "zero",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_0.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_1",
+    "text": "one",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_1.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_2",
+    "text": "two",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_2.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_3",
+    "text": "three",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_3.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_4",
+    "text": "four",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_4.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_5",
+    "text": "five",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_5.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_6",
+    "text": "six",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_6.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_7",
+    "text": "seven",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_7.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_8",
+    "text": "eight",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_8.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "digit_9",
+    "text": "nine",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "digit_9.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

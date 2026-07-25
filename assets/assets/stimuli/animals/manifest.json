@@ -1,0 +1,50 @@
+[
+  {
+    "id": "animal_dog",
+    "text": "dog",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "animal_dog.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "animal_cat",
+    "text": "cat",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "animal_cat.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "animal_elephant",
+    "text": "elephant",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "animal_elephant.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "animal_fish",
+    "text": "fish",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "animal_fish.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "animal_bird",
+    "text": "bird",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "animal_bird.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "animal_cow",
+    "text": "cow",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "animal_cow.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

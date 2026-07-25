@@ -1,0 +1,50 @@
+[
+  {
+    "id": "food_apple",
+    "text": "apple",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "food_apple.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "food_banana",
+    "text": "banana",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "food_banana.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "food_grapes",
+    "text": "grapes",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "food_grapes.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "food_pizza",
+    "text": "pizza",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "food_pizza.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "food_bread",
+    "text": "bread",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "food_bread.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "food_egg",
+    "text": "egg",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "food_egg.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "v1",
+    "text": "hello",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "speaker_v1.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "v2",
+    "text": "hello",
+    "voice": "en-IN-PrabhatNeural",
+    "file": "speaker_v2.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "v3",
+    "text": "hello",
+    "voice": "en-US-JennyNeural",
+    "file": "speaker_v3.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "v4",
+    "text": "hello",
+    "voice": "en-GB-RyanNeural",
+    "file": "speaker_v4.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

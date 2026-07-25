@@ -1,0 +1,98 @@
+[
+  {
+    "id": "syl_ba",
+    "text": "ba",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_ba.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_pa",
+    "text": "pa",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_pa.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_da",
+    "text": "da",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_da.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_ta",
+    "text": "ta",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_ta.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_ga",
+    "text": "ga",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_ga.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_ka",
+    "text": "ka",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_ka.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_ma",
+    "text": "ma",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_ma.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_na",
+    "text": "na",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_na.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_sa",
+    "text": "sa",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_sa.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_sha",
+    "text": "sha",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_sha.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_fa",
+    "text": "fa",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_fa.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "syl_va",
+    "text": "va",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "syl_va.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

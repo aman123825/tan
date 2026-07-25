@@ -1,0 +1,402 @@
+[
+  {
+    "id": "matrix_name_peter",
+    "text": "peter",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_peter.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_thomas",
+    "text": "thomas",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_thomas.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_lucy",
+    "text": "lucy",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_lucy.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_alan",
+    "text": "alan",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_alan.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_nina",
+    "text": "nina",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_nina.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_rachel",
+    "text": "rachel",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_rachel.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_david",
+    "text": "david",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_david.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_sara",
+    "text": "sara",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_sara.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_john",
+    "text": "john",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_john.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_name_emma",
+    "text": "emma",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_name_emma.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_has",
+    "text": "has",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_has.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_wants",
+    "text": "wants",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_wants.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_gives",
+    "text": "gives",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_gives.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_buys",
+    "text": "buys",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_buys.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_sees",
+    "text": "sees",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_sees.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_keeps",
+    "text": "keeps",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_keeps.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_sells",
+    "text": "sells",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_sells.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_holds",
+    "text": "holds",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_holds.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_brings",
+    "text": "brings",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_brings.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_verb_takes",
+    "text": "takes",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_verb_takes.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_two",
+    "text": "two",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_two.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_three",
+    "text": "three",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_three.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_four",
+    "text": "four",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_four.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_five",
+    "text": "five",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_five.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_six",
+    "text": "six",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_six.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_seven",
+    "text": "seven",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_seven.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_eight",
+    "text": "eight",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_eight.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_nine",
+    "text": "nine",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_nine.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_ten",
+    "text": "ten",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_ten.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_number_twelve",
+    "text": "twelve",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_number_twelve.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_red",
+    "text": "red",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_red.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_green",
+    "text": "green",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_green.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_blue",
+    "text": "blue",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_blue.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_big",
+    "text": "big",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_big.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_small",
+    "text": "small",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_small.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_old",
+    "text": "old",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_old.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_new",
+    "text": "new",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_new.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_dark",
+    "text": "dark",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_dark.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_pink",
+    "text": "pink",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_pink.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_adjective_white",
+    "text": "white",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_adjective_white.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_toys",
+    "text": "toys",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_toys.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_pens",
+    "text": "pens",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_pens.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_books",
+    "text": "books",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_books.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_cups",
+    "text": "cups",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_cups.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_rings",
+    "text": "rings",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_rings.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_chairs",
+    "text": "chairs",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_chairs.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_desks",
+    "text": "desks",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_desks.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_shoes",
+    "text": "shoes",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_shoes.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_bags",
+    "text": "bags",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_bags.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "matrix_object_cards",
+    "text": "cards",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "matrix_object_cards.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

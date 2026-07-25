@@ -1,0 +1,1266 @@
+{
+  "schema_version": "1.0.0",
+  "product": "HearBloom",
+  "status": "research_specification",
+  "modules": [
+    {
+      "id": "foundation",
+      "name": "Foundation Listening",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "pure_tone",
+          "name": "Pure Tone / Music Note Discrimination",
+          "protocol": "3afc_oddball",
+          "parameters": {
+            "trials": 25,
+            "levels": [
+              {
+                "choices": 3,
+                "semitones": "7-12"
+              },
+              {
+                "choices": 3,
+                "semitones": "4-6"
+              },
+              {
+                "choices": 3,
+                "semitones": "2-3"
+              },
+              {
+                "choices": 3,
+                "semitones": "1"
+              }
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "environment",
+          "name": "Environmental Sound Identification",
+          "protocol": "closed_set",
+          "parameters": {
+            "trials": 25,
+            "adapt": [
+              "choices",
+              "acoustic_similarity",
+              "noise"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "speaker",
+          "name": "Speaker and Voice Identification",
+          "protocol": "closed_set",
+          "parameters": {
+            "trials": 25,
+            "levels": [
+              "different_gender_3afc",
+              "same_gender_3afc",
+              "talker_4afc"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "vowel",
+          "name": "Vowel Recognition",
+          "protocol": "phoneme_contrast",
+          "parameters": {
+            "position": "medial",
+            "adapt": [
+              "contrast",
+              "choices",
+              "preview",
+              "noise"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "consonant",
+          "name": "Consonant Recognition",
+          "protocol": "phoneme_contrast",
+          "parameters": {
+            "positions": [
+              "initial",
+              "medial",
+              "final"
+            ],
+            "adapt": [
+              "contrast",
+              "choices",
+              "preview",
+              "noise"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "word",
+          "name": "Everyday Word Recognition",
+          "protocol": "closed_set",
+          "parameters": {
+            "adapt": [
+              "choices",
+              "talker",
+              "noise",
+              "rate"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "sentence",
+          "name": "Everyday Sentence Recognition",
+          "protocol": "closed_set",
+          "parameters": {
+            "stimulus_target": 1440,
+            "levels_snr_db": [
+              null,
+              15,
+              10,
+              5
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "music_appreciation",
+          "name": "Music Appreciation",
+          "protocol": "music_identification",
+          "parameters": {
+            "adapt": [
+              "pitch",
+              "rhythm",
+              "timbre"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "telephone",
+      "name": "Telephone Listening",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "signal_chain": {
+        "bandpass_hz": [
+          300,
+          3200
+        ]
+      },
+      "inherits": "foundation",
+      "groups": []
+    },
+    {
+      "id": "noise",
+      "name": "Adaptive Speech in Noise",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "vowel_noise",
+          "name": "Medial Vowel Recognition in Noise",
+          "protocol": "adaptive_snr_4afc",
+          "parameters": {
+            "trials": 25,
+            "step_db": 2,
+            "noises": [
+              "six_talker_babble",
+              "speech_shaped",
+              "white"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "initial_consonant_noise",
+          "name": "Initial Consonant Recognition in Noise",
+          "protocol": "adaptive_snr_4afc",
+          "parameters": {
+            "trials": 25,
+            "step_db": 2
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "medial_consonant_noise",
+          "name": "Medial Consonant Recognition in Noise",
+          "protocol": "adaptive_snr_4afc",
+          "parameters": {
+            "trials": 25,
+            "step_db": 2
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "final_consonant_noise",
+          "name": "Final Consonant Recognition in Noise",
+          "protocol": "adaptive_snr_4afc",
+          "parameters": {
+            "trials": 25,
+            "step_db": 2
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "number_noise",
+          "name": "Number Recognition in Noise",
+          "protocol": "adaptive_snr_4afc",
+          "parameters": {
+            "trials": 25,
+            "step_db": 2
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "sentence_noise",
+          "name": "Everyday Sentence Recognition in Noise",
+          "protocol": "adaptive_snr_4afc",
+          "parameters": {
+            "trials": 25,
+            "step_db": 2
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "melodic",
+      "name": "Melodic Contour Identification",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "pure_tone_contour",
+          "name": "Pure Tone Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "intervals_semitones": [
+              5,
+              4,
+              3,
+              2,
+              1
+            ],
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "piano_contour",
+          "name": "Piano Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "trumpet_contour",
+          "name": "Trumpet Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "violin_contour",
+          "name": "Violin Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "organ_contour",
+          "name": "Organ Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "clarinet_contour",
+          "name": "Clarinet Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "glockenspiel_contour",
+          "name": "Glockenspiel Contours",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "notes": 5,
+            "patterns": 9
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "openset",
+      "name": "Open-set Recognition",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "open_word",
+          "name": "Open-set Word Recognition",
+          "protocol": "typed_open_set",
+          "parameters": {
+            "levels_snr_db": [
+              null,
+              10,
+              0
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "open_sentence",
+          "name": "Open-set Sentence Recognition",
+          "protocol": "typed_open_set",
+          "parameters": {
+            "levels_snr_db": [
+              null,
+              10,
+              0
+            ],
+            "score": "word_accuracy"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "digit_span",
+          "name": "Digit Recognition",
+          "protocol": "sequence_entry",
+          "parameters": {
+            "lengths": [
+              3,
+              5,
+              7
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "melody_sequence",
+          "name": "Melody Note Sequence",
+          "protocol": "sequence_entry",
+          "parameters": {
+            "lengths": [
+              2,
+              3,
+              5,
+              7
+            ],
+            "range": "C4-C5"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "instrument_sequence",
+          "name": "Instrument Sequence",
+          "protocol": "sequence_entry",
+          "parameters": {
+            "lengths": [
+              2,
+              3,
+              5,
+              7
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "matrix_sentence",
+          "name": "Concatenated Matrix Sentences",
+          "protocol": "matrix_sentence",
+          "parameters": {
+            "categories": [
+              "noun",
+              "verb",
+              "number",
+              "adjective",
+              "noun"
+            ],
+            "words_each": 10,
+            "combinations": 100000,
+            "levels_snr_db": [
+              null,
+              10,
+              0
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "recognition_threshold",
+          "name": "Recognition Threshold Battery",
+          "protocol": "adaptive_srt",
+          "parameters": {
+            "materials": [
+              "words",
+              "sentences",
+              "digits",
+              "matrix_sentences"
+            ],
+            "noise": "six_talker_babble"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "Comprehensive Music",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "note_discrimination",
+          "name": "Music Note Discrimination",
+          "protocol": "3afc_oddball",
+          "parameters": {
+            "trials": 25,
+            "notes": 52,
+            "levels_semitones": [
+              "7-12",
+              "4-6",
+              "2-3",
+              "1"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "mci",
+          "name": "Melodic Contour Identification",
+          "protocol": "mci_9choice",
+          "parameters": {
+            "trials": 25,
+            "stimuli_min": 1000,
+            "levels_semitones": [
+              "5-6",
+              "3-4",
+              "2",
+              "1"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "melodic_sequence",
+          "name": "Melodic Sequence Identification",
+          "protocol": "sequence_entry",
+          "parameters": {
+            "trials": 25,
+            "levels_step_semitones": [
+              3,
+              2,
+              1,
+              "random"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "chord",
+          "name": "Music Chord Identification",
+          "protocol": "chord_identification",
+          "parameters": {
+            "trials": 25,
+            "stimuli": 24,
+            "levels": [
+              "discriminate",
+              "major_minor",
+              "six_chords"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "contour_segregation",
+          "name": "Music Contour Segregation",
+          "protocol": "mci_with_masker",
+          "parameters": {
+            "maskers": [
+              "A4",
+              "A5",
+              "A6",
+              "A7",
+              null
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "instrument",
+          "name": "Music Instrument Identification",
+          "protocol": "instrument_sequence",
+          "parameters": {
+            "choices": 6,
+            "sequence_lengths": [
+              1,
+              2,
+              3,
+              5
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "familiar_melody",
+          "name": "Familiar Melody Identification",
+          "protocol": "melody_identification",
+          "parameters": {
+            "melodies": 12,
+            "conditions": [
+              "with_rhythm",
+              "without_rhythm"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "auditory",
+      "name": "Auditory Resolution",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "frequency_jnd",
+          "name": "Frequency Discrimination",
+          "protocol": "adaptive_3afc",
+          "parameters": {
+            "targets": [
+              "music_note_1",
+              "music_note_2",
+              "music_note_3",
+              "1000_hz"
+            ],
+            "measure": "jnd"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "modulation_depth",
+          "name": "Modulation Detection",
+          "protocol": "adaptive_3afc",
+          "parameters": {
+            "rates_hz": [
+              10,
+              20,
+              50,
+              100,
+              200
+            ],
+            "range_db": [
+              -40,
+              0
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "modulation_rate",
+          "name": "Modulation Frequency Discrimination",
+          "protocol": "adaptive_3afc",
+          "parameters": {
+            "rates_hz": [
+              10,
+              20,
+              50,
+              100,
+              200
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "gap",
+          "name": "Temporal Gap Detection",
+          "protocol": "adaptive_3afc",
+          "parameters": {
+            "carriers": [
+              "noise",
+              "1000_hz",
+              "2000_hz"
+            ],
+            "gap_position": "middle"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "amplitude",
+          "name": "Amplitude Discrimination",
+          "protocol": "adaptive_3afc",
+          "parameters": {
+            "carriers": [
+              "noise",
+              "1000_hz",
+              "2000_hz"
+            ],
+            "measure": "level_jnd"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "forward_masking",
+          "name": "Tone Detection with Masker",
+          "protocol": "adaptive_detection",
+          "parameters": {
+            "masker": "white_noise",
+            "probe_hz": 1000,
+            "gaps_ms": [
+              10,
+              20,
+              30,
+              50,
+              75,
+              100
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "pure_tone",
+          "name": "Pure-tone Detection",
+          "protocol": "adaptive_detection",
+          "parameters": {
+            "frequencies_hz": [
+              250,
+              500,
+              1000,
+              2000,
+              4000
+            ],
+            "research_only": true
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "rhythm",
+          "name": "Music Rhythm Test and Training",
+          "protocol": "rhythm_discrimination",
+          "parameters": {
+            "change_notes": [
+              2,
+              3
+            ],
+            "contours": [
+              "flat",
+              "rising",
+              "falling"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "dichotic_digits",
+          "name": "Dichotic Digits",
+          "protocol": "dichotic_digits",
+          "parameters": {
+            "digits_per_ear": 1,
+            "requires_headphones": true
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "assessment",
+      "name": "Functional Hearing Assessment",
+      "audience": [
+        "adult",
+        "teen"
+      ],
+      "groups": [
+        {
+          "id": "resolution_battery",
+          "name": "Auditory Resolution Tests",
+          "protocol": "threshold_battery",
+          "parameters": {
+            "measures": [
+              "frequency_jnd",
+              "gap_ms",
+              "modulation_depth_db"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "phoneme_battery",
+          "name": "Phoneme Recognition",
+          "protocol": "identification_matrix",
+          "parameters": {
+            "vowels": 12,
+            "consonants": 20,
+            "include_voice_gender": true
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "music_battery",
+          "name": "Music Perception",
+          "protocol": "music_battery",
+          "parameters": {
+            "measures": [
+              "note_jnd",
+              "mci_9",
+              "instruments_6",
+              "familiar_melodies_12"
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "noise_battery",
+          "name": "Speech Recognition in Noise",
+          "protocol": "adaptive_srt",
+          "parameters": {
+            "tasks": [
+              "three_digit_babble",
+              "keyword_in_sentence"
+            ],
+            "target_correct": 0.5
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "cognition_battery",
+          "name": "Auditory Cognition",
+          "protocol": "adaptive_span",
+          "parameters": {
+            "tasks": [
+              "forward_digit_span",
+              "backward_digit_span"
+            ],
+            "target_correct": 0.5
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "cnc_battery",
+          "name": "Open-set CNC Word Recognition",
+          "protocol": "typed_open_set",
+          "parameters": {
+            "lists": 3,
+            "score": "word_and_phoneme"
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    },
+    {
+      "id": "learning",
+      "name": "Learning by Listening",
+      "audience": [
+        "child",
+        "caregiver"
+      ],
+      "conditions": [
+        {
+          "id": "quiet"
+        },
+        {
+          "id": "telephone",
+          "bandpass_hz": [
+            300,
+            3200
+          ]
+        },
+        {
+          "id": "music_10",
+          "snr_db": 10
+        },
+        {
+          "id": "music_0",
+          "snr_db": 0
+        }
+      ],
+      "groups": [
+        {
+          "id": "alphabet",
+          "name": "Learning ABC",
+          "protocol": "closed_set",
+          "parameters": {
+            "items": 26
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "food",
+          "name": "Learning Food Names",
+          "protocol": "picture_identification",
+          "parameters": {
+            "items_approx": 100
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "animals",
+          "name": "Learning Animal Names",
+          "protocol": "picture_identification",
+          "parameters": {
+            "items_approx": 100
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "colors",
+          "name": "Learning Colors",
+          "protocol": "picture_identification",
+          "parameters": {
+            "items": 12
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "numbers",
+          "name": "Learning Numbers",
+          "protocol": "closed_set",
+          "parameters": {
+            "range": [
+              1,
+              20
+            ]
+          },
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        },
+        {
+          "id": "phonetic_contrast",
+          "name": "Minimal Phonetic Contrasts",
+          "protocol": "phoneme_contrast",
+          "parameters": {},
+          "modes": [
+            "introduction",
+            "preview",
+            "training",
+            "test",
+            "results"
+          ],
+          "validation_status": "unvalidated"
+        }
+      ]
+    }
+  ]
+}
