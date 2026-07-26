@@ -1,0 +1,130 @@
+[
+  {
+    "id": "word_bell",
+    "text": "bell",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_bell.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_ball",
+    "text": "ball",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_ball.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_bat",
+    "text": "bat",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_bat.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_bag",
+    "text": "bag",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_bag.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_pen",
+    "text": "pen",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_pen.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_pin",
+    "text": "pin",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_pin.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_cup",
+    "text": "cup",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_cup.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_cap",
+    "text": "cap",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_cap.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_dog",
+    "text": "dog",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_dog.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_cat",
+    "text": "cat",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_cat.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_book",
+    "text": "book",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_book.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_key",
+    "text": "key",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_key.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_ship",
+    "text": "ship",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_ship.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_chip",
+    "text": "chip",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_chip.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_boat",
+    "text": "boat",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_boat.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_coat",
+    "text": "coat",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_coat.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

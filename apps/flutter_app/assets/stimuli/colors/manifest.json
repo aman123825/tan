@@ -1,0 +1,66 @@
+[
+  {
+    "id": "color_red",
+    "text": "red",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_red.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_green",
+    "text": "green",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_green.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_blue",
+    "text": "blue",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_blue.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_yellow",
+    "text": "yellow",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_yellow.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_orange",
+    "text": "orange",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_orange.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_purple",
+    "text": "purple",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_purple.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_black",
+    "text": "black",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_black.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "color_white",
+    "text": "white",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "color_white.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

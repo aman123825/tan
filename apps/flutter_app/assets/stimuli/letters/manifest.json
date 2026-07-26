@@ -1,0 +1,210 @@
+[
+  {
+    "id": "letter_a",
+    "text": "a",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_a.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_b",
+    "text": "b",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_b.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_c",
+    "text": "c",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_c.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_d",
+    "text": "d",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_d.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_e",
+    "text": "e",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_e.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_f",
+    "text": "f",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_f.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_g",
+    "text": "g",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_g.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_h",
+    "text": "h",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_h.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_i",
+    "text": "i",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_i.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_j",
+    "text": "j",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_j.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_k",
+    "text": "k",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_k.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_l",
+    "text": "l",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_l.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_m",
+    "text": "m",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_m.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_n",
+    "text": "n",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_n.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_o",
+    "text": "o",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_o.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_p",
+    "text": "p",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_p.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_q",
+    "text": "q",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_q.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_r",
+    "text": "r",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_r.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_s",
+    "text": "s",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_s.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_t",
+    "text": "t",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_t.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_u",
+    "text": "u",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_u.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_v",
+    "text": "v",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_v.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_w",
+    "text": "w",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_w.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_x",
+    "text": "x",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_x.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_y",
+    "text": "y",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_y.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "letter_z",
+    "text": "z",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "letter_z.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

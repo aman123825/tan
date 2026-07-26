@@ -1,0 +1,74 @@
+[
+  {
+    "id": "word_bell",
+    "kind": "generated_speech",
+    "text": "bell",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_bell.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_ball",
+    "kind": "generated_speech",
+    "text": "ball",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_ball.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_bat",
+    "kind": "generated_speech",
+    "text": "bat",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_bat.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_bag",
+    "kind": "generated_speech",
+    "text": "bag",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_bag.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_pen",
+    "kind": "generated_speech",
+    "text": "pen",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_pen.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_pin",
+    "kind": "generated_speech",
+    "text": "pin",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_pin.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_cup",
+    "kind": "generated_speech",
+    "text": "cup",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_cup.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  },
+  {
+    "id": "word_cap",
+    "kind": "generated_speech",
+    "text": "cap",
+    "voice": "en-IN-NeerjaNeural",
+    "file": "word_cap.wav",
+    "sample_rate": 24000,
+    "validation_status": "demo_only"
+  }
+]

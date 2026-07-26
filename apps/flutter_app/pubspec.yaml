@@ -1,0 +1,35 @@
+name: hearbloom
+version: 0.1.0+1
+publish_to: none
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  just_audio: ^0.9.40
+  fl_chart: ^0.69.0
+  intl: ^0.19.0
+  google_fonts: ^6.2.1
+  cryptography: ^2.7.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/protocols/
+    - assets/stimuli/
+    - assets/stimuli/speech/
+    - assets/stimuli/digits/
+    - assets/stimuli/letters/
+    - assets/stimuli/phonemes/
+    - assets/stimuli/words/
+    - assets/stimuli/sentences/
+    - assets/stimuli/colors/
+    - assets/stimuli/matrix/
+    - assets/stimuli/food/
+    - assets/stimuli/animals/
+    - assets/stimuli/speaker/

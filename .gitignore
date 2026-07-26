@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/*.db
+*.db
+build/
+.dart_tool/
+.flutter-plugins*
+*.iml
+ephemeral/
+.idea/
+.playwright-mcp/

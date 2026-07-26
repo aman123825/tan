@@ -1,0 +1,69 @@
+{
+  "_comment": "Word pools for tools/generate_multilang.py. 10 common words per language, mirroring apps/flutter_app/lib/core/i18n/language_config.dart. Edit words/voices here; re-run the script to (re)generate assets/stimuli/<lang>/.",
+  "languages": {
+    "hi": {
+      "name": "Hindi",
+      "voice": "hi-IN-SwaraNeural",
+      "words": [
+        {"native": "पानी", "roman": "paani", "english": "water"},
+        {"native": "खाना", "roman": "khaana", "english": "food"},
+        {"native": "माता", "roman": "maata", "english": "mother"},
+        {"native": "पिता", "roman": "pita", "english": "father"},
+        {"native": "घर", "roman": "ghar", "english": "house"},
+        {"native": "किताब", "roman": "kitaab", "english": "book"},
+        {"native": "हाथ", "roman": "haath", "english": "hand"},
+        {"native": "आँख", "roman": "aankh", "english": "eye"},
+        {"native": "सूरज", "roman": "sooraj", "english": "sun"},
+        {"native": "चाँद", "roman": "chaand", "english": "moon"}
+      ]
+    },
+    "ta": {
+      "name": "Tamil",
+      "voice": "ta-IN-PallaviNeural",
+      "words": [
+        {"native": "தண்ணீர்", "roman": "thanneer", "english": "water"},
+        {"native": "உணவு", "roman": "unavu", "english": "food"},
+        {"native": "அம்மா", "roman": "amma", "english": "mother"},
+        {"native": "அப்பா", "roman": "appa", "english": "father"},
+        {"native": "வீடு", "roman": "veedu", "english": "house"},
+        {"native": "புத்தகம்", "roman": "puthagam", "english": "book"},
+        {"native": "கை", "roman": "kai", "english": "hand"},
+        {"native": "கண்", "roman": "kan", "english": "eye"},
+        {"native": "சூரியன்", "roman": "sooriyan", "english": "sun"},
+        {"native": "நிலா", "roman": "nila", "english": "moon"}
+      ]
+    },
+    "te": {
+      "name": "Telugu",
+      "voice": "te-IN-ShrutiNeural",
+      "words": [
+        {"native": "నీరు", "roman": "neeru", "english": "water"},
+        {"native": "ఆహారం", "roman": "aahaaram", "english": "food"},
+        {"native": "అమ్మ", "roman": "amma", "english": "mother"},
+        {"native": "నాన్న", "roman": "nanna", "english": "father"},
+        {"native": "ఇల్లు", "roman": "illu", "english": "house"},
+        {"native": "పుస్తకం", "roman": "pustakam", "english": "book"},
+        {"native": "చెయ్యి", "roman": "cheyyi", "english": "hand"},
+        {"native": "కన్ను", "roman": "kannu", "english": "eye"},
+        {"native": "సూర్యుడు", "roman": "sooryudu", "english": "sun"},
+        {"native": "చంద్రుడు", "roman": "chandrudu", "english": "moon"}
+      ]
+    },
+    "kn": {
+      "name": "Kannada",
+      "voice": "kn-IN-SapnaNeural",
+      "words": [
+        {"native": "ನೀರು", "roman": "neeru", "english": "water"},
+        {"native": "ಆಹಾರ", "roman": "aahaara", "english": "food"},
+        {"native": "ಅಮ್ಮ", "roman": "amma", "english": "mother"},
+        {"native": "ಅಪ್ಪ", "roman": "appa", "english": "father"},
+        {"native": "ಮನೆ", "roman": "mane", "english": "house"},
+        {"native": "ಪುಸ್ತಕ", "roman": "pustaka", "english": "book"},
+        {"native": "ಕೈ", "roman": "kai", "english": "hand"},
+        {"native": "ಕಣ್ಣು", "roman": "kannu", "english": "eye"},
+        {"native": "ಸೂರ್ಯ", "roman": "soorya", "english": "sun"},
+        {"native": "ಚಂದ್ರ", "roman": "chandra", "english": "moon"}
+      ]
+    }
+  }
+}

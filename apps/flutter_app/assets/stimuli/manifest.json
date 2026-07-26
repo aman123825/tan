@@ -1,0 +1,161 @@
+[
+  {
+    "id": "tone_250",
+    "kind": "tone",
+    "file": "tone_250.wav",
+    "frequency_hz": 250
+  },
+  {
+    "id": "tone_500",
+    "kind": "tone",
+    "file": "tone_500.wav",
+    "frequency_hz": 500
+  },
+  {
+    "id": "tone_1000",
+    "kind": "tone",
+    "file": "tone_1000.wav",
+    "frequency_hz": 1000
+  },
+  {
+    "id": "tone_2000",
+    "kind": "tone",
+    "file": "tone_2000.wav",
+    "frequency_hz": 2000
+  },
+  {
+    "id": "tone_4000",
+    "kind": "tone",
+    "file": "tone_4000.wav",
+    "frequency_hz": 4000
+  },
+  {
+    "id": "gap_2ms",
+    "kind": "gap",
+    "file": "gap_2ms.wav",
+    "gap_ms": 2
+  },
+  {
+    "id": "gap_5ms",
+    "kind": "gap",
+    "file": "gap_5ms.wav",
+    "gap_ms": 5
+  },
+  {
+    "id": "gap_10ms",
+    "kind": "gap",
+    "file": "gap_10ms.wav",
+    "gap_ms": 10
+  },
+  {
+    "id": "gap_20ms",
+    "kind": "gap",
+    "file": "gap_20ms.wav",
+    "gap_ms": 20
+  },
+  {
+    "id": "gap_40ms",
+    "kind": "gap",
+    "file": "gap_40ms.wav",
+    "gap_ms": 40
+  },
+  {
+    "id": "am_10hz",
+    "kind": "modulation",
+    "file": "am_10hz.wav",
+    "rate_hz": 10,
+    "depth_db": -12
+  },
+  {
+    "id": "am_20hz",
+    "kind": "modulation",
+    "file": "am_20hz.wav",
+    "rate_hz": 20,
+    "depth_db": -12
+  },
+  {
+    "id": "am_50hz",
+    "kind": "modulation",
+    "file": "am_50hz.wav",
+    "rate_hz": 50,
+    "depth_db": -12
+  },
+  {
+    "id": "am_100hz",
+    "kind": "modulation",
+    "file": "am_100hz.wav",
+    "rate_hz": 100,
+    "depth_db": -12
+  },
+  {
+    "id": "am_200hz",
+    "kind": "modulation",
+    "file": "am_200hz.wav",
+    "rate_hz": 200,
+    "depth_db": -12
+  },
+  {
+    "id": "noise_steady",
+    "kind": "noise",
+    "file": "noise_steady.wav"
+  },
+  {
+    "id": "noise_babble_demo",
+    "kind": "noise",
+    "file": "noise_babble_demo.wav"
+  },
+  {
+    "id": "mci_rise",
+    "kind": "mci",
+    "file": "mci_rise.wav",
+    "pattern": "rise"
+  },
+  {
+    "id": "mci_fall",
+    "kind": "mci",
+    "file": "mci_fall.wav",
+    "pattern": "fall"
+  },
+  {
+    "id": "mci_flat",
+    "kind": "mci",
+    "file": "mci_flat.wav",
+    "pattern": "flat"
+  },
+  {
+    "id": "mci_rise_fall",
+    "kind": "mci",
+    "file": "mci_rise_fall.wav",
+    "pattern": "rise_fall"
+  },
+  {
+    "id": "mci_fall_rise",
+    "kind": "mci",
+    "file": "mci_fall_rise.wav",
+    "pattern": "fall_rise"
+  },
+  {
+    "id": "mci_rise_flat",
+    "kind": "mci",
+    "file": "mci_rise_flat.wav",
+    "pattern": "rise_flat"
+  },
+  {
+    "id": "mci_flat_rise",
+    "kind": "mci",
+    "file": "mci_flat_rise.wav",
+    "pattern": "flat_rise"
+  },
+  {
+    "id": "mci_fall_flat",
+    "kind": "mci",
+    "file": "mci_fall_flat.wav",
+    "pattern": "fall_flat"
+  },
+  {
+    "id": "mci_flat_fall",
+    "kind": "mci",
+    "file": "mci_flat_fall.wav",
+    "pattern": "flat_fall"
+  }
+]
