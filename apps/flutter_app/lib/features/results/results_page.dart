@@ -276,7 +276,7 @@ class _NormsReferenceCard extends StatelessWidget {
                       child: Text(cite,
                           textAlign: TextAlign.right,
                           style: const TextStyle(
-                              fontSize: 11, color: const Color(0xff94a3b8))),
+                              fontSize: 11, color: Color(0xff94a3b8))),
                     ),
                   ],
                 ),
@@ -397,7 +397,7 @@ class _AccuracyChart extends StatelessWidget {
               Text(
                 '${i + 1}: ${buckets[i].condition ?? '?'} · '
                 '${buckets[i].outputDevice ?? '?'} · ${buckets[i].mode}',
-                style: const TextStyle(fontSize: 11, color: const Color(0xff94a3b8)),
+                style: const TextStyle(fontSize: 11, color: Color(0xff94a3b8)),
               ),
           ],
         ),
@@ -502,7 +502,7 @@ class _Metric extends StatelessWidget {
         ),
         Text(
           label,
-          style: const TextStyle(color: const Color(0xff94a3b8), fontSize: 12),
+          style: const TextStyle(color: Color(0xff94a3b8), fontSize: 12),
         ),
       ],
     );

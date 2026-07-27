@@ -11,6 +11,7 @@ import '../../core/closed_set.dart';
 import '../../core/protocol_engine.dart';
 import '../catalog/validation_badge.dart';
 import '../common/norm_tile.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Generic closed-set identification renderer: a recorded item plays (optionally
@@ -94,6 +95,9 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
           (path) async => (await rootBundle.load(path)).buffer.asUint8List();
 
   ClosedSetTrial? _current;
+
+  /// The exact presented buffer (for wrong-answer replays).
+  Uint8List? _lastWav;
   VoiceVariant _voice = kVoiceVariants.first;
   DateTime? _shownAt;
   int _replays = 0;
@@ -116,8 +120,9 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
     return '$m:$s';
   }
 
-  String get _breadcrumb =>
-      widget.snrTrack != null ? 'Recognition in noise' : 'Closed-set recognition';
+  String get _breadcrumb => widget.snrTrack != null
+      ? 'Recognition in noise'
+      : 'Closed-set recognition';
 
   @override
   void initState() {
@@ -143,6 +148,7 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
       _played = false;
       _chosen = null;
       _lastCorrect = null;
+      _lastWav = null;
     });
     _scheduleAutoPlay();
   }
@@ -152,7 +158,7 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
   /// played; the Play button remains a first-trial fallback.
   void _scheduleAutoPlay() {
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer(const Duration(seconds: 2), () {
+    _autoPlayTimer = Timer(kTrialPrePlayDelay, () {
       if (mounted && !_played) _play();
     });
   }
@@ -185,7 +191,9 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
         );
         out = mixAtSnr(out, noise, snr);
       }
-      await _audio.playWav(encodeWav16(out, sampleRate: speech.sampleRate));
+      final wav = encodeWav16(out, sampleRate: speech.sampleRate);
+      _lastWav = wav; // exact bytes for wrong-answer replays
+      await _audio.playWav(wav);
     } catch (_) {
       // Missing asset / playback failure must not block the exercise.
     }
@@ -208,9 +216,36 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
       _lastCorrect = correct;
       _results.add(correct);
     });
-    // Show feedback briefly, then auto-advance; Next remains a manual override.
+    // Hands-free flow: in training a wrong answer re-plays the item twice
+    // before moving on; otherwise a short feedback beat, then auto-advance.
+    // Next remains a manual override.
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1500), () {
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
+  }
+
+  /// Wrong-answer sequence: replay the exact presented buffer twice, a brief
+  /// beat, then advance automatically.
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosen == null) return;
+    // Cancellable beat before advancing (a raw Future.delayed would leak a
+    // timer past dispose).
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosen != null) _advance();
     });
   }
@@ -269,8 +304,7 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
         MetaPill(icon: Icons.lock, text: 'Level $_levelPercent%'),
         if (widget.varyVoice)
           MetaPill(
-              icon: Icons.record_voice_over,
-              text: '${_voice.label} (proxy)'),
+              icon: Icons.record_voice_over, text: '${_voice.label} (proxy)'),
       ],
       transport: [
         TransportAction(
@@ -402,7 +436,8 @@ class _ClosedSetPageState extends State<ClosedSetPage> {
         Text(
             'Research measurement only — not a diagnosis. Generated demo '
             'speech, not validated clinical stimuli.',
-            style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8))),
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: const Color(0xff94a3b8))),
         const SizedBox(height: 20),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_session),
@@ -441,8 +476,7 @@ class _ChoiceButton extends StatelessWidget {
         : (switch (state) {
             _ChoiceState.correct => const Color(0x3322c55e),
             _ChoiceState.wrong => const Color(0x33ef4444),
-            _ChoiceState.neutral =>
-              const Color(0xff293548),
+            _ChoiceState.neutral => const Color(0xff293548),
           });
     return Semantics(
       button: true,
@@ -502,7 +536,7 @@ class _FeedbackLine extends StatelessWidget {
         if (!correct) ...[
           const SizedBox(height: 6),
           Text('The correct answer was: $answer',
-              style: const TextStyle(color: const Color(0xff94a3b8))),
+              style: const TextStyle(color: Color(0xff94a3b8))),
         ],
       ],
     );
@@ -522,7 +556,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),

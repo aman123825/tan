@@ -161,12 +161,13 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
     expect(find.text('Play the sample to enable the choices.'), findsNothing);
 
-    // Without tapping Next, the 1.5s auto-advance moves to the next (fresh,
-    // unanswered) trial: Next is gone and the play-first hint returns.
+    // Without tapping Next, the flow advances by itself (a short beat after
+    // the corrective replays on a wrong answer, ~1.5 s on a correct one):
+    // Next is gone and a fresh, unanswered trial is on screen.
     await tester.pump(const Duration(milliseconds: 1600));
     await tester.pumpAndSettle();
     expect(find.text('Next'), findsNothing);
-    expect(find.text('Play the sample to enable the choices.'), findsOneWidget);
+    expect(find.textContaining('Question 2 of'), findsOneWidget);
   });
 
   testWidgets('gap detection plays synthesized audio and advances on a choice',
@@ -182,6 +183,7 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
 
     // Wired-headphone guidance for temporal tasks is shown.
@@ -193,7 +195,7 @@ void main() {
 
     // Choosing an interval records the trial and offers to advance.
     await tester.tap(find.text('1'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Next'), findsOneWidget);
   });
 
@@ -288,6 +290,7 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('wired headphones'), findsOneWidget);
@@ -295,7 +298,7 @@ void main() {
     expect(find.text('Replay sequence (0/5)'), findsOneWidget);
 
     await tester.tap(find.text('1'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Next'), findsOneWidget);
   });
 
@@ -326,6 +329,24 @@ void main() {
 
     await tester.tap(find.text('Begin training'));
     await tester.pumpAndSettle();
+    expect(started, isTrue);
+  });
+
+  testWidgets('protocol intro can skip directly to the test', (tester) async {
+    var started = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProtocolIntroScreen(
+          title: 'Speech in noise',
+          description: 'Task description here.',
+          exampleText: 'Example instruction here.',
+          onStart: () => started = true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('protocol-intro-skip')));
+    await tester.pump();
     expect(started, isTrue);
   });
 
@@ -381,7 +402,7 @@ void main() {
     );
 
     await tester.tap(find.text(label).first);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Correct'), findsOneWidget);
   });
 
@@ -398,6 +419,7 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
 
     // Auto-played on trial start — no manual Play tap.
@@ -413,7 +435,7 @@ void main() {
     );
 
     await tester.tap(find.text('1'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Next'), findsOneWidget);
   });
 
@@ -454,8 +476,8 @@ void main() {
       250,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Research reference points (illustrative)'),
-        findsOneWidget);
+    expect(
+        find.text('Research reference points (illustrative)'), findsOneWidget);
     expect(find.textContaining('Musiek et al., 2005'), findsOneWidget);
   });
 
@@ -472,13 +494,14 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
 
     expect(port.playCount, 1);
     expect(find.text('Replay sounds (0/5)'), findsOneWidget);
 
     await tester.tap(find.text('1'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Next'), findsOneWidget);
   });
 
@@ -545,6 +568,8 @@ void main() {
         ),
       ),
     );
+    // The trial auto-plays after the 1.2 s breathing room.
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
 
     // Auto-played on trial start — no manual Play tap needed.
@@ -552,7 +577,7 @@ void main() {
     expect(find.text('Replay (0/5)'), findsOneWidget);
 
     await tester.tap(find.text('Sound ${target.targetInterval + 1}'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Correct'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
   });
@@ -583,15 +608,22 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
     expect(port.playCount, 1); // auto-play
 
     final wrong = (target.targetInterval + 1) % 3;
     await tester.tap(find.text('Sound ${wrong + 1}'));
-    await tester.pumpAndSettle();
+    // Bounded pumps: check feedback + replays before the 0.3 s beat that
+    // auto-advances to the next trial.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('Not quite'), findsOneWidget);
     // 1 auto-play + 2 corrective replays.
     expect(port.playCount, 3);
+    // Then the flow moves on by itself.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Not quite'), findsNothing);
   });
 
   testWidgets('interval task caps manual replay at 5', (tester) async {
@@ -618,6 +650,7 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pumpAndSettle();
     expect(port.playCount, 1); // auto-play
 

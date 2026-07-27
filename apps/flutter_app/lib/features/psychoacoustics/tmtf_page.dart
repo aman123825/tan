@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import '../../core/audio/audio_port.dart';
 import '../../core/audio/pcm_synth.dart';
 import '../../core/forced_choice.dart';
-import '../../core/protocol_engine.dart'
-    show flagLastTrial, lastTrialFlagged;
+import '../../core/protocol_engine.dart' show flagLastTrial, lastTrialFlagged;
 import '../../core/psychoacoustics.dart';
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Temporal Modulation Transfer Function: modulation-detection thresholds at
@@ -45,6 +46,10 @@ class _TmtfPageState extends State<TmtfPage> {
   bool? _lastCorrect;
   bool _finished = false;
   Timer? _advanceTimer;
+  Timer? _prePlayTimer;
+
+  /// The exact presented buffer (for wrong-answer replays).
+  Uint8List? _lastWav;
   final List<bool> _results = <bool>[];
 
   @override
@@ -56,6 +61,7 @@ class _TmtfPageState extends State<TmtfPage> {
   @override
   void dispose() {
     _advanceTimer?.cancel();
+    _prePlayTimer?.cancel();
     super.dispose();
   }
 
@@ -69,8 +75,13 @@ class _TmtfPageState extends State<TmtfPage> {
       _played = false;
       _chosen = null;
       _lastCorrect = null;
+      _lastWav = null;
     });
-    unawaited(_play());
+    // Short breathing room, then the new triple auto-plays.
+    _prePlayTimer?.cancel();
+    _prePlayTimer = Timer(kTrialPrePlayDelay, () {
+      if (mounted && !_finished && _chosen == null) unawaited(_play());
+    });
   }
 
   Future<void> _play() async {
@@ -84,7 +95,9 @@ class _TmtfPageState extends State<TmtfPage> {
         rateHz: _session.currentRateHz,
         seed: widget.seed * 1000 + _session.completedTrials,
       );
-      await _audio.playWav(encodeWav16(seq));
+      final wav = encodeWav16(seq);
+      _lastWav = wav; // exact bytes for wrong-answer replays
+      await _audio.playWav(wav);
     } catch (_) {}
     if (!mounted) return;
     _latency
@@ -99,7 +112,6 @@ class _TmtfPageState extends State<TmtfPage> {
   void _choose(int interval) {
     if (_chosen != null || !_played) return;
     _latency.stop();
-    final rateBefore = _session.currentRateHz;
     final correct = _session.submit(_trial!.targetInterval, interval,
         latencyMs: _latency.elapsedMilliseconds);
     setState(() {
@@ -107,11 +119,35 @@ class _TmtfPageState extends State<TmtfPage> {
       _lastCorrect = correct;
       _results.add(correct);
     });
-    final rateChanged =
-        _session.isComplete || _session.currentRateHz != rateBefore;
+    // Hands-free flow: a wrong answer re-plays the triple twice before the
+    // next question; correct answers move on after a short beat.
     _advanceTimer?.cancel();
-    _advanceTimer = Timer(
-        Duration(milliseconds: rateChanged ? 1400 : 900), () {
+    if (!correct) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _advanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _nextTrial();
+      });
+    }
+  }
+
+  /// Wrong-answer sequence: replay the exact presented triple twice, a brief
+  /// beat, then continue automatically.
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosen == null) return;
+    // Cancellable beat before advancing (a raw Future.delayed would leak a
+    // timer past dispose).
+    _advanceTimer?.cancel();
+    _advanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosen != null) _nextTrial();
     });
   }
@@ -139,8 +175,7 @@ class _TmtfPageState extends State<TmtfPage> {
     return TrialScaffold(
       title: 'Temporal modulation (TMTF)',
       subtitle: 'Envelope sensitivity · ${_session.rates.length} rates',
-      instruction:
-          'Three noise bursts play. One flutters — choose which.',
+      instruction: 'Three noise bursts play. One flutters — choose which.',
       isPlaying: _playing,
       validationBadge: const ValidationBadge(validationStatus: 'unvalidated'),
       liveResults: _results,
@@ -173,8 +208,7 @@ class _TmtfPageState extends State<TmtfPage> {
           onTap: _finish,
         ),
       ],
-      statusLeft:
-          'Rate ${_session.rateNumber} of ${_session.rates.length}',
+      statusLeft: 'Rate ${_session.rateNumber} of ${_session.rates.length}',
       statusRight: 'Elapsed Time ${_fmtTime(_sw.elapsed)}',
       onStop: _finish,
       onFlagLastTrial: answered
@@ -212,9 +246,8 @@ class _TmtfPageState extends State<TmtfPage> {
                     label: 'Sound ${i + 1}',
                     enabled: _played && !answered,
                     correct: answered && i == _trial!.targetInterval,
-                    wrong: answered &&
-                        _chosen == i &&
-                        i != _trial!.targetInterval,
+                    wrong:
+                        answered && _chosen == i && i != _trial!.targetInterval,
                     onTap: () => _choose(i),
                   ),
                 ),
@@ -269,8 +302,7 @@ class _TmtfPageState extends State<TmtfPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(_rateLabel(r),
-                          style:
-                              const TextStyle(color: Color(0xff94a3b8))),
+                          style: const TextStyle(color: Color(0xff94a3b8))),
                       Text(
                         _session.thresholdFor(r) == null
                             ? 'not reached'

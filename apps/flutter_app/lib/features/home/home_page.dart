@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ import '../psychoacoustics/tmtf_page.dart';
 import '../mld/mld_test_page.dart';
 import '../dashboard/clinician_dashboard_page.dart';
 import '../report/report_tab.dart';
+import '../report/session_result_sheet.dart';
 import '../settings/settings_page.dart';
 import '../validation/validation_protocol_page.dart';
 import '../rgdt/rgdt_page.dart';
@@ -84,6 +86,7 @@ import '../common/difficulty_selector.dart';
 import '../mci/mci_page.dart';
 import '../modulation_detection/modulation_detection_page.dart';
 import '../note_sequence/note_sequence_page.dart';
+import '../onboarding/onboarding_page.dart';
 import '../open_set/open_set_page.dart';
 import '../pitch_discrimination/pitch_discrimination_page.dart';
 import '../protocol/protocol_intro_screen.dart';
@@ -92,7 +95,6 @@ import '../results/results_page.dart';
 import '../review/clinician_review_page.dart';
 import '../sequence_entry/sequence_entry_page.dart';
 import '../speech_in_noise/speech_in_noise_page.dart';
-import '../../core/gamification.dart';
 import '../../core/session_summary.dart';
 import '../../data/gamification_store.dart';
 import '../gamification/gamification_overlay.dart';
@@ -175,64 +177,48 @@ class _TrainingModule {
   final IconData icon;
 }
 
-const List<_TrainingModule> kTrainingModules = <_TrainingModule>[
+const List<_TrainingModule> _kTrainingModules = <_TrainingModule>[
   _TrainingModule(
       'Competing Speakers', 'Follow the louder talker', Icons.people),
-  _TrainingModule(
-      'Speed Training', 'Keep up with faster speech', Icons.speed),
+  _TrainingModule('Speed Training', 'Keep up with faster speech', Icons.speed),
   _TrainingModule(
       'Phonemic Contrast', 'Tell close sounds apart', Icons.spellcheck),
-  _TrainingModule(
-      'Auditory Closure', 'Fill in the masked gaps', Icons.blur_on),
+  _TrainingModule('Auditory Closure', 'Fill in the masked gaps', Icons.blur_on),
   _TrainingModule(
       'Sound Continuum', 'Climb progressive levels', Icons.trending_up),
-  _TrainingModule(
-      'Working Memory', 'Digit span and n-back', Icons.psychology),
+  _TrainingModule('Working Memory', 'Digit span and n-back', Icons.psychology),
   _TrainingModule(
       'Following Directions', 'Act on ordered steps', Icons.directions),
   _TrainingModule(
       'Vocoded Speech', 'Understand cochlear-implant sound', Icons.graphic_eq),
-  _TrainingModule(
-      'Sound Localization', 'Find where sounds come from',
+  _TrainingModule('Sound Localization', 'Find where sounds come from',
       Icons.spatial_audio_off),
-  _TrainingModule(
-      'Vowel Training', 'Tell the 12 vowels apart · 5 levels',
+  _TrainingModule('Vowel Training', 'Tell the 12 vowels apart · 5 levels',
       Icons.record_voice_over),
+  _TrainingModule('Consonant Training',
+      'Sharpen consonant contrasts · 4 levels', Icons.graphic_eq),
+  _TrainingModule('Dichotic Integration',
+      'Train the weak ear · fading level gap', Icons.hearing),
+  _TrainingModule('Prosody Training',
+      'Question, stress and emotion · 20 trials', Icons.record_voice_over),
   _TrainingModule(
-      'Consonant Training', 'Sharpen consonant contrasts · 4 levels',
-      Icons.graphic_eq),
+      'Reverb Training', 'Hear words in a room · adaptive RT60', Icons.blur_on),
   _TrainingModule(
-      'Dichotic Integration', 'Train the weak ear · fading level gap',
-      Icons.hearing),
-  _TrainingModule(
-      'Prosody Training', 'Question, stress and emotion · 20 trials',
-      Icons.record_voice_over),
-  _TrainingModule(
-      'Reverb Training', 'Hear words in a room · adaptive RT60',
-      Icons.blur_on),
-  _TrainingModule(
-      'Pitch Ranking', 'Order tones low to high · 15 trials',
-      Icons.sort),
+      'Pitch Ranking', 'Order tones low to high · 15 trials', Icons.sort),
   _TrainingModule(
       'Timbre Training', 'Tell waveforms apart · 4AFC', Icons.graphic_eq),
   _TrainingModule(
-      'Emotion in Music', 'Happy, sad, tense or calm · 4AFC',
-      Icons.music_note),
+      'Emotion in Music', 'Happy, sad, tense or calm · 4AFC', Icons.music_note),
+  _TrainingModule('Phonological Games',
+      'Rhyme, blend & delete sounds · 3 games', Icons.child_care),
+  _TrainingModule('Real-World Scenes',
+      'Restaurant, classroom & phone · adaptive', Icons.restaurant),
   _TrainingModule(
-      'Phonological Games', 'Rhyme, blend & delete sounds · 3 games',
-      Icons.child_care),
+      'Interhemispheric', 'Hear one ear, tap the other hand', Icons.swap_horiz),
   _TrainingModule(
-      'Real-World Scenes', 'Restaurant, classroom & phone · adaptive',
-      Icons.restaurant),
+      'Speech Tracking', 'Type words as you hear them · WPM', Icons.keyboard),
   _TrainingModule(
-      'Interhemispheric', 'Hear one ear, tap the other hand',
-      Icons.swap_horiz),
-  _TrainingModule(
-      'Speech Tracking', 'Type words as you hear them · WPM',
-      Icons.keyboard),
-  _TrainingModule(
-      'Sentence Closure', 'Fill the gap from context · 4AFC',
-      Icons.short_text),
+      'Sentence Closure', 'Fill the gap from context · 4AFC', Icons.short_text),
 ];
 
 class HomePage extends StatefulWidget {
@@ -291,8 +277,8 @@ class _HomePageState extends State<HomePage> {
     // Research consent (J8): ask once per consent-text version.
     ConsentStore().load().then((decision) {
       if (decision == null && mounted) {
-        Navigator.of(context).push(MaterialPageRoute<void>(
-            builder: (_) => const ConsentPage()));
+        Navigator.of(context)
+            .push(MaterialPageRoute<void>(builder: (_) => const ConsentPage()));
       }
     });
   }
@@ -471,39 +457,44 @@ class _HomePageState extends State<HomePage> {
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'speedtrain':
         page = CompressedTrainingPage(
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'phonemic':
         page = PhonemicContrastPage(
           comfortableLevel: 0.4,
           maxTrials: 30,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'closure':
         page = ClosureTrainingPage(
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'continuum':
         page = ContinuumPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'memory':
         page = WorkingMemoryPage(
@@ -516,8 +507,9 @@ class _HomePageState extends State<HomePage> {
         page = FollowingDirectionsPage(
           comfortableLevel: 0.4,
           maxTrials: 15,
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'report':
         page = const ReportTabPage();
@@ -547,22 +539,25 @@ class _HomePageState extends State<HomePage> {
         page = BinauralJndPage(
           mode: 'itd',
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'ildjnd':
         page = BinauralJndPage(
           mode: 'ild',
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'figureground':
         page = FigureGroundPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'tmtf':
         page = TmtfPage(
@@ -580,8 +575,9 @@ class _HomePageState extends State<HomePage> {
         page = MusicInNoisePage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'beattap':
         page = BeatTapPage(
@@ -594,8 +590,8 @@ class _HomePageState extends State<HomePage> {
       case 'ri':
         page = ResidualInhibitionPage(
           audioPort: JustAudioPort(),
-          onCompleted: (s) => _persistRun(
-              s.moduleId, s.groupId, 'test', s.records, session: s),
+          onCompleted: (s) =>
+              _persistRun(s.moduleId, s.groupId, 'test', s.records, session: s),
         );
       case 'desens':
         page = DesensitizationPage(audioPort: JustAudioPort());
@@ -625,16 +621,18 @@ class _HomePageState extends State<HomePage> {
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'spatial':
         page = SpatialPage(
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'planner':
         page = PlannerPage(onStartExercise: _launchRecommended);
@@ -642,29 +640,33 @@ class _HomePageState extends State<HomePage> {
         page = LisnsPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'ssw':
         page = SswPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'dsi':
         page = DsiPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'dichoticint':
         page = DichoticIntegrationPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'ssq12':
         page = const Ssq12Page();
@@ -689,22 +691,25 @@ class _HomePageState extends State<HomePage> {
       case 'phono':
         page = PhonologicalPage(
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'scene':
         page = ScenePage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'interhemi':
         page = InterhemisphericPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'tracking':
         page = SpeechTrackingPage(
@@ -717,8 +722,9 @@ class _HomePageState extends State<HomePage> {
         page = SentenceClosurePage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 'openpools':
         page = _openWordPoolPage();
@@ -758,8 +764,8 @@ class _HomePageState extends State<HomePage> {
     switch (moduleId) {
       case 'auditory':
         return <ProtocolGroup>[
-          _diagGroup(
-              'duration_pattern', 'Duration Pattern Test (DPT)', 'pattern_sequence'),
+          _diagGroup('duration_pattern', 'Duration Pattern Test (DPT)',
+              'pattern_sequence'),
           _diagGroup('frequency_pattern', 'Frequency Pattern Test (FPT)',
               'pattern_sequence'),
           _diagGroup('masking_level_difference',
@@ -767,26 +773,24 @@ class _HomePageState extends State<HomePage> {
           _diagGroup(
               'random_gap_detection', 'Random Gap Detection (RGDT)', 'rgdt'),
           _diagGroup('ssw', 'Staggered Spondaic Words (SSW)', 'ssw'),
-          _diagGroup(
-              'dsi', 'Dichotic Sentence Identification (DSI)', 'dsi'),
+          _diagGroup('dsi', 'Dichotic Sentence Identification (DSI)', 'dsi'),
           _diagGroup('screening_audiogram', 'Screening Audiogram (250–8k Hz)',
               'audiogram'),
           _diagGroup('itd_jnd', 'ITD Lateralization JND', 'binaural_jnd'),
           _diagGroup('ild_jnd', 'ILD Lateralization JND', 'binaural_jnd'),
           _diagGroup('tmtf', 'Temporal Modulation Curve (TMTF)', 'tmtf'),
-          _diagGroup('spectral_ripple', 'Spectral Ripple Discrimination',
-              'ripple'),
-          _diagGroup('irn_pitch', 'Rippled-Noise Pitch Strength (IRN)',
-              'irn'),
+          _diagGroup(
+              'spectral_ripple', 'Spectral Ripple Discrimination', 'ripple'),
+          _diagGroup('irn_pitch', 'Rippled-Noise Pitch Strength (IRN)', 'irn'),
         ];
       case 'music':
         return <ProtocolGroup>[
-          _diagGroup('rhythm_change', 'Rhythm Change in Melody',
-              'rhythm_change'),
-          _diagGroup('music_in_noise', 'Music in Noise (melodies)',
-              'music_in_noise'),
-          _diagGroup('beat_tapping', 'Beat Tapping (production)',
-              'beat_tapping'),
+          _diagGroup(
+              'rhythm_change', 'Rhythm Change in Melody', 'rhythm_change'),
+          _diagGroup(
+              'music_in_noise', 'Music in Noise (melodies)', 'music_in_noise'),
+          _diagGroup(
+              'beat_tapping', 'Beat Tapping (production)', 'beat_tapping'),
         ];
       case 'noise':
         return <ProtocolGroup>[
@@ -838,8 +842,8 @@ class _HomePageState extends State<HomePage> {
           'Three noisy sounds play. One has a flipped spectral pattern — '
           'choose which sounds different.',
       session: session,
-      synth: (t, p, i) => buildRippleOddballSequence(
-          targetInterval: t, periodOct: p, seed: i),
+      synth: (t, p, i) =>
+          buildRippleOddballSequence(targetInterval: t, periodOct: p, seed: i),
       paramChip: (v) => '${(1 / v).toStringAsFixed(1)} ripples/oct',
       thresholdText: (t) => t == null
           ? 'not reached'
@@ -848,8 +852,9 @@ class _HomePageState extends State<HomePage> {
       intervalSeconds: 0.35,
       gapSeconds: 0.25,
       audioPort: JustAudioPort(),
-      onCompleted: (s) =>
-          _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+      onCompleted: (s) => _persistRun(
+          s.moduleId, s.groupId, s.mode.name, s.records,
+          session: s),
     );
   }
 
@@ -879,8 +884,9 @@ class _HomePageState extends State<HomePage> {
       intervalSeconds: 0.4,
       gapSeconds: 0.3,
       audioPort: JustAudioPort(),
-      onCompleted: (s) =>
-          _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+      onCompleted: (s) => _persistRun(
+          s.moduleId, s.groupId, s.mode.name, s.records,
+          session: s),
     );
   }
 
@@ -900,19 +906,19 @@ class _HomePageState extends State<HomePage> {
           'The same tune plays twice. One version has an uneven rhythm — '
           'choose which.',
       session: session,
-      synth: (t, p, i) => buildRhythmChangeSequence(
-          targetInterval: t, displaceMs: p, seed: i),
+      synth: (t, p, i) =>
+          buildRhythmChangeSequence(targetInterval: t, displaceMs: p, seed: i),
       paramChip: (v) => '${v.round()} ms shift',
-      thresholdText: (t) => t == null
-          ? 'not reached'
-          : '${t.round()} ms timing change detected',
+      thresholdText: (t) =>
+          t == null ? 'not reached' : '${t.round()} ms timing change detected',
       choiceWord: 'Melody',
       intervalSeconds: 4.5,
       gapSeconds: 0.5,
       validationStatus: 'demo_only',
       audioPort: JustAudioPort(),
-      onCompleted: (s) =>
-          _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+      onCompleted: (s) => _persistRun(
+          s.moduleId, s.groupId, s.mode.name, s.records,
+          session: s),
     );
   }
 
@@ -1088,17 +1094,21 @@ class _HomePageState extends State<HomePage> {
           difficulty: d,
           audioPort: JustAudioPort(),
           onCompleted: (s) => _persistRun(
-              s.moduleId, s.groupId, 'test', s.records, session: s)));
+              s.moduleId, s.groupId, 'test', s.records,
+              session: s)));
     } else if (group.id.contains('frequency_pattern')) {
       _launchDiagnostic((d) => PatternTestPage(
           testType: 'fpt',
           difficulty: d,
           audioPort: JustAudioPort(),
           onCompleted: (s) => _persistRun(
-              s.moduleId, s.groupId, 'test', s.records, session: s)));
+              s.moduleId, s.groupId, 'test', s.records,
+              session: s)));
     } else if (group.id.contains('masking_level') || group.id.contains('mld')) {
       _launchDiagnostic((d) => MldTestPage(
-          maxTrialsPerCondition: 15, difficulty: d, audioPort: JustAudioPort()));
+          maxTrialsPerCondition: 15,
+          difficulty: d,
+          audioPort: JustAudioPort()));
     } else if (group.id.contains('gap_detection') ||
         group.id.contains('rgdt')) {
       _pushPage(RgdtPage(
@@ -1126,22 +1136,25 @@ class _HomePageState extends State<HomePage> {
       _pushPage(LisnsPage(
         comfortableLevel: 0.4,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (group.id == 'ssw') {
       _pushPage(SswPage(
         comfortableLevel: 0.4,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (group.id == 'dsi') {
       _pushPage(DsiPage(
         comfortableLevel: 0.4,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (group.id == 'screening_audiogram') {
       _pushPage(AudiogramPage(
@@ -1153,15 +1166,17 @@ class _HomePageState extends State<HomePage> {
       _pushPage(BinauralJndPage(
         mode: group.id == 'itd_jnd' ? 'itd' : 'ild',
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (group.id == 'figure_ground') {
       _pushPage(FigureGroundPage(
         comfortableLevel: 0.4,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (group.id == 'tmtf') {
       _pushPage(TmtfPage(
@@ -1179,8 +1194,9 @@ class _HomePageState extends State<HomePage> {
       _pushPage(MusicInNoisePage(
         comfortableLevel: 0.4,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (group.id == 'beat_tapping') {
       _pushPage(BeatTapPage(
@@ -1264,9 +1280,9 @@ class _HomePageState extends State<HomePage> {
         difficulty: _difficulty,
         validationStatus: validationStatus,
         audioPort: JustAudioPort(),
-        onCompleted: (session) =>
-            _persistRun(moduleId, groupId, session.mode.name, session.records,
-                session: session),
+        onCompleted: (session) => _persistRun(
+            moduleId, groupId, session.mode.name, session.records,
+            session: session),
       ),
     );
   }
@@ -1305,16 +1321,16 @@ class _HomePageState extends State<HomePage> {
           ),
           paramChip: (v) => '×${v.toStringAsFixed(2)}',
           difficulty: _difficulty,
-          thresholdText: (t) => t == null
-              ? 'not reached'
-              : '×${t.toStringAsFixed(2)} rate ratio',
+          thresholdText: (t) =>
+              t == null ? 'not reached' : '×${t.toStringAsFixed(2)} rate ratio',
           choiceWord: 'Sound',
           intervalSeconds: 0.5,
           gapSeconds: 0.25,
           validationStatus: validationStatus,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
@@ -1362,8 +1378,9 @@ class _HomePageState extends State<HomePage> {
           validationStatus: validationStatus,
           audioPort: JustAudioPort(),
           resultExtra: (ctx, t) => NormTile(Norms.amDepthDb(t)),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
@@ -1388,9 +1405,9 @@ class _HomePageState extends State<HomePage> {
         comfortableLevel: level,
         validationStatus: validationStatus,
         audioPort: JustAudioPort(),
-        onCompleted: (session) =>
-            _persistRun(moduleId, groupId, session.mode.name, session.records,
-                session: session),
+        onCompleted: (session) => _persistRun(
+            moduleId, groupId, session.mode.name, session.records,
+            session: session),
       ),
     );
   }
@@ -1434,8 +1451,9 @@ class _HomePageState extends State<HomePage> {
           difficulty: _difficulty,
           audioPort: JustAudioPort(),
           resultExtra: (ctx, t) => NormTile(Norms.frequencySemitones(t)),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
@@ -1459,9 +1477,9 @@ class _HomePageState extends State<HomePage> {
         comfortableLevel: level,
         validationStatus: validationStatus,
         audioPort: JustAudioPort(),
-        onCompleted: (session) =>
-            _persistRun(moduleId, groupId, session.mode.name, session.records,
-                session: session),
+        onCompleted: (session) => _persistRun(
+            moduleId, groupId, session.mode.name, session.records,
+            session: session),
       ),
     );
   }
@@ -1505,8 +1523,9 @@ class _HomePageState extends State<HomePage> {
           validationStatus: validationStatus,
           difficulty: _difficulty,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
@@ -1566,8 +1585,9 @@ class _HomePageState extends State<HomePage> {
               'and not a dB HL threshold.',
           validationStatus: validationStatus,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
@@ -1614,8 +1634,9 @@ class _HomePageState extends State<HomePage> {
           researchNote: 'Research measurement only — not a diagnosis.',
           validationStatus: validationStatus,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
@@ -1828,8 +1849,9 @@ class _HomePageState extends State<HomePage> {
         validationStatus: group.validationStatus,
         audioProvider: (target, i) async => encodeWav16(sfxStimulus(target.id)),
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(module.id, group.id, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            module.id, group.id, s.mode.name, s.records,
+            session: s),
       ),
     );
   }
@@ -1854,8 +1876,9 @@ class _HomePageState extends State<HomePage> {
         audioProvider: (target, i) async =>
             (await rootBundle.load(target.assetPath!)).buffer.asUint8List(),
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(module.id, group.id, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            module.id, group.id, s.mode.name, s.records,
+            session: s),
       ),
     );
   }
@@ -1880,8 +1903,9 @@ class _HomePageState extends State<HomePage> {
         validationStatus: group.validationStatus,
         audioProvider: (target, i) async => encodeWav16(melodySynth(target.id)),
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(module.id, group.id, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            module.id, group.id, s.mode.name, s.records,
+            session: s),
       ),
     );
   }
@@ -1910,8 +1934,9 @@ class _HomePageState extends State<HomePage> {
         lengths: lengths,
         validationStatus: group.validationStatus,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(module.id, group.id, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            module.id, group.id, s.mode.name, s.records,
+            session: s),
       ),
     );
   }
@@ -1938,8 +1963,9 @@ class _HomePageState extends State<HomePage> {
         audioProvider: (target, i) async =>
             (await rootBundle.load(target.assetPath!)).buffer.asUint8List(),
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(module.id, group.id, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            module.id, group.id, s.mode.name, s.records,
+            session: s),
       ),
     );
   }
@@ -1999,8 +2025,9 @@ class _HomePageState extends State<HomePage> {
         varyVoice: group.id == 'word' || group.id == 'sentence',
         validationStatus: group.validationStatus,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(module.id, group.id, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            module.id, group.id, s.mode.name, s.records,
+            session: s),
       ),
     );
   }
@@ -2026,16 +2053,17 @@ class _HomePageState extends State<HomePage> {
               (lvl) => GapDetectionPage(
                   comfortableLevel: lvl,
                   audioPort: port(),
-                  onCompleted: (s) =>
-                      _persistRun('auditory', 'gap', s.mode.name, s.records,
-                          session: s))),
+                  onCompleted: (s) => _persistRun(
+                      'auditory', 'gap', s.mode.name, s.records,
+                      session: s))),
           BatteryStage(
               'Modulation detection',
               (lvl) => ModulationDetectionPage(
                   comfortableLevel: lvl,
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'auditory', 'modulation_depth', s.mode.name, s.records, session: s))),
+                      'auditory', 'modulation_depth', s.mode.name, s.records,
+                      session: s))),
           BatteryStage(
               'Frequency discrimination',
               (lvl) => PitchDiscriminationPage(
@@ -2044,7 +2072,8 @@ class _HomePageState extends State<HomePage> {
                   comfortableLevel: lvl,
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'auditory', 'frequency_jnd', s.mode.name, s.records, session: s))),
+                      'auditory', 'frequency_jnd', s.mode.name, s.records,
+                      session: s))),
         ];
       case 'music_battery':
       case 'music_appreciation':
@@ -2057,23 +2086,24 @@ class _HomePageState extends State<HomePage> {
                   comfortableLevel: lvl,
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'music', 'note_discrimination', s.mode.name, s.records, session: s))),
+                      'music', 'note_discrimination', s.mode.name, s.records,
+                      session: s))),
           BatteryStage(
               'Melodic contour',
               (lvl) => MciPage(
                   comfortableLevel: lvl,
                   audioPort: port(),
-                  onCompleted: (s) =>
-                      _persistRun('music', 'mci', s.mode.name, s.records,
-                          session: s))),
+                  onCompleted: (s) => _persistRun(
+                      'music', 'mci', s.mode.name, s.records,
+                      session: s))),
           BatteryStage(
               'Chord identification',
               (lvl) => ChordIdentificationPage(
                   comfortableLevel: lvl,
                   audioPort: port(),
-                  onCompleted: (s) =>
-                      _persistRun('music', 'chord', s.mode.name, s.records,
-                          session: s))),
+                  onCompleted: (s) => _persistRun(
+                      'music', 'chord', s.mode.name, s.records,
+                      session: s))),
         ];
       case 'cognition_battery':
         return <BatteryStage>[
@@ -2082,7 +2112,8 @@ class _HomePageState extends State<HomePage> {
               (lvl) => SequenceEntryPage(
                   comfortableLevel: lvl,
                   onCompleted: (s) => _persistRun(
-                      'openset', 'digit_span', s.mode.name, s.records, session: s))),
+                      'openset', 'digit_span', s.mode.name, s.records,
+                      session: s))),
           BatteryStage(
               'Melody recall',
               (lvl) => SymbolSequencePage(
@@ -2095,7 +2126,8 @@ class _HomePageState extends State<HomePage> {
                   playNoun: 'melody',
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'openset', 'melody_sequence', s.mode.name, s.records, session: s))),
+                      'openset', 'melody_sequence', s.mode.name, s.records,
+                      session: s))),
         ];
       case 'noise_battery':
         return <BatteryStage>[
@@ -2107,7 +2139,8 @@ class _HomePageState extends State<HomePage> {
                   comfortableLevel: lvl,
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'noise', 'sentence_noise', s.mode.name, s.records, session: s))),
+                      'noise', 'sentence_noise', s.mode.name, s.records,
+                      session: s))),
         ];
       case 'recognition_threshold':
         return <BatteryStage>[
@@ -2119,14 +2152,16 @@ class _HomePageState extends State<HomePage> {
                   comfortableLevel: lvl,
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'noise', 'sentence_noise', s.mode.name, s.records, session: s))),
+                      'noise', 'sentence_noise', s.mode.name, s.records,
+                      session: s))),
           BatteryStage(
               'Open-set words',
               (lvl) => OpenSetPage(
                   comfortableLevel: lvl,
                   audioPort: port(),
                   onCompleted: (s) => _persistRun(
-                      'openset', 'open_word', s.mode.name, s.records, session: s))),
+                      'openset', 'open_word', s.mode.name, s.records,
+                      session: s))),
         ];
       case 'phoneme_battery':
         return <BatteryStage>[
@@ -2142,8 +2177,9 @@ class _HomePageState extends State<HomePage> {
                       'Play the sound, then choose the syllable you heard.',
                   choiceCount: 4,
                   audioPort: port(),
-                  onCompleted: (s) => _persistRun('assessment',
-                      'phoneme_battery', s.mode.name, s.records, session: s))),
+                  onCompleted: (s) => _persistRun(
+                      'assessment', 'phoneme_battery', s.mode.name, s.records,
+                      session: s))),
         ];
       default:
         return const <BatteryStage>[];
@@ -2187,9 +2223,9 @@ class _HomePageState extends State<HomePage> {
         playNoun: 'melody',
         validationStatus: validationStatus,
         audioPort: JustAudioPort(),
-        onCompleted: (session) =>
-            _persistRun(moduleId, groupId, session.mode.name, session.records,
-                session: session),
+        onCompleted: (session) => _persistRun(
+            moduleId, groupId, session.mode.name, session.records,
+            session: session),
       ),
     );
   }
@@ -2211,9 +2247,9 @@ class _HomePageState extends State<HomePage> {
         groupId: groupId,
         comfortableLevel: level,
         validationStatus: validationStatus,
-        onCompleted: (session) =>
-            _persistRun(moduleId, groupId, session.mode.name, session.records,
-                session: session),
+        onCompleted: (session) => _persistRun(
+            moduleId, groupId, session.mode.name, session.records,
+            session: session),
       ),
     );
   }
@@ -2262,19 +2298,16 @@ class _HomePageState extends State<HomePage> {
           difficulty: _difficulty,
           audioPort: JustAudioPort(),
           resultExtra: (ctx, t) => NormTile(Norms.gapMs(t)),
-          onCompleted: (s) =>
-              _persistRun(moduleId, groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              moduleId, groupId, s.mode.name, s.records,
+              session: s),
         );
       },
     );
   }
 
-  /// Durably queues a completed run's trials, then best-effort syncs them.
-  ///
-  /// Everything is offline-safe: if the backend is unreachable the trials stay
-  /// in the durable [TrialQueue] and sync on a later successful [flush]. Uses
-  /// only verified building blocks ([enqueueSessionTrials], [TrialQueue],
-  /// [Api.postTrial]); failures never surface to the training UI.
+  /// Saves a completed run locally first, shows its report, then performs
+  /// optional network work in the background.
   Future<void> _persistRun(
     String moduleId,
     String groupId,
@@ -2283,60 +2316,23 @@ class _HomePageState extends State<HomePage> {
     Object? session,
   }) async {
     if (records.isEmpty) return;
-    // Consent (J8): an explicit decline means NOTHING is persisted -- no
-    // queue, no history, no gamification. The run itself already happened
-    // and showed its results; it simply leaves no trace.
-    if (!persistenceAllowed) return;
-    final trialQueue = await _queueFuture;
-    await trialQueue.load();
-    String sessionId;
-    try {
-      final profile = await _api.createProfile(<String, dynamic>{});
-      final s = await _api.createSession(<String, dynamic>{
-        'profile_id': profile['id'],
-      });
-      sessionId = s['id'] as String;
-      if (mounted) setState(() => _lastProfileId = profile['id'] as String);
-    } catch (_) {
-      // Offline: attach to a client id; reconciliation happens on later sync.
-      sessionId = 'local-${DateTime.now().microsecondsSinceEpoch}';
-    }
-    await enqueueSessionTrials(
-      trialQueue,
-      sessionId: sessionId,
-      moduleId: moduleId,
-      groupId: groupId,
-      mode: mode,
-      records: records,
-    );
+    // Consent (J8): an explicit decline means nothing is persisted. The
+    // listener still receives an in-memory result report for this run.
+    final canPersist = persistenceAllowed;
+
     // Post-session fatigue + confidence self-report (optional; never affects
     // scoring).
     PostSessionRatings? ratings;
     if (mounted) {
       ratings = await showFatigueSheet(context);
-      final fatigueAfter = ratings?.fatigue;
-      if (fatigueAfter != null && !sessionId.startsWith('local-')) {
-        try {
-          await _api.endSession(sessionId, fatigueAfter);
-        } catch (_) {
-          // Offline/failure: the session simply stays open for later.
-        }
-      }
-    }
-    try {
-      await trialQueue.flush(_api.postTrial);
-    } catch (_) {
-      // Leave unsent trials queued for the next opportunity.
     }
 
-    // Record in on-device session history for the UI. When the completed
-    // session object is provided its headline metric (reversal-based
-    // threshold, per-ear percents…) is stored too — for adaptive tests that
-    // metric, not the staircase-pinned accuracy, is the real result.
+    // Build and persist the real report before touching the network. This is
+    // the offline-first source of truth used by reports, trends and exports.
     final correct = records.where((r) => r.correct == true).length;
     final accuracy = records.isEmpty ? 0.0 : correct / records.length;
     final metric = summarizeSession(session);
-    await SessionHistory().add(SessionRecord(
+    final record = SessionRecord(
       timestamp: DateTime.now(),
       moduleId: moduleId,
       groupId: groupId,
@@ -2354,23 +2350,72 @@ class _HomePageState extends State<HomePage> {
       confidence: ratings?.confidence,
       confusions: confusionPairsOf(records),
       label: ratings?.label,
-    ));
-
-    // Opt-in local usage counters (J10): a no-op unless enabled in settings.
-    await UsageStats().record(groupId);
-
-    // Gamification: award points, extend the streak and unlock any badges for
-    // the completed session, then celebrate new badges. Purely motivational —
-    // it never affects scoring, adaptation or master volume.
-    final List<GamificationBadge> newBadges =
-        await GamificationStore().recordSession(
-      trials: records.length,
-      correct: correct,
-      testId: groupId,
     );
-    for (final badge in newBadges) {
-      if (!mounted) break;
-      await showBadgeCelebration(context, badge);
+    var savedOffline = false;
+    if (canPersist) {
+      try {
+        await SessionHistory().add(record);
+        savedOffline = true;
+
+        // Keep raw trials in the encrypted on-device queue. Upload is never
+        // attempted here; online sharing happens only from the explicit Sync
+        // screen after the listener links a clinician code.
+        unawaited(_queueCompletedRun(
+          moduleId: moduleId,
+          groupId: groupId,
+          mode: mode,
+          records: records,
+        ));
+
+        // Opt-in local usage counters (J10): a no-op unless enabled.
+        await UsageStats().record(groupId);
+
+        // Gamification is local-only and never affects scoring or volume.
+        final newBadges = await GamificationStore().recordSession(
+          trials: records.length,
+          correct: correct,
+          testId: groupId,
+        );
+        for (final badge in newBadges) {
+          if (!mounted) break;
+          await showBadgeCelebration(context, badge);
+        }
+      } catch (_) {
+        // Storage failures must not suppress the just-completed result.
+      }
+    }
+
+    if (!mounted) return;
+    final openReports = await showSessionResultSheet(
+      context,
+      record: record,
+      savedOffline: savedOffline,
+    );
+    if (!mounted || !openReports) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    setState(() => _tabIndex = 4);
+  }
+
+  /// Queues raw trials locally without making a network request.
+  Future<void> _queueCompletedRun({
+    required String moduleId,
+    required String groupId,
+    required String mode,
+    required List<TrialRecord> records,
+  }) async {
+    try {
+      final trialQueue = await _queueFuture;
+      await trialQueue.load();
+      await enqueueSessionTrials(
+        trialQueue,
+        sessionId: 'local-${DateTime.now().microsecondsSinceEpoch}',
+        moduleId: moduleId,
+        groupId: groupId,
+        mode: mode,
+        records: records,
+      );
+    } catch (_) {
+      // The summary report remains available if raw-trial queuing fails.
     }
   }
 
@@ -2420,20 +2465,24 @@ class _HomePageState extends State<HomePage> {
         comfortableLevel: 0.4,
         maxTrials: 20,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (id == 'spatial') {
       _pushPage(SpatialPage(
         comfortableLevel: 0.4,
         maxTrials: 20,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (id.contains('noise') || module == 'noise') {
       _startSpeechInNoise(
-          moduleId: 'noise', groupId: 'sentence_noise', validationStatus: unvalidated);
+          moduleId: 'noise',
+          groupId: 'sentence_noise',
+          validationStatus: unvalidated);
     } else if (id == 'gap') {
       _startGapDetection(
           moduleId: module, groupId: id, validationStatus: unvalidated);
@@ -2458,16 +2507,18 @@ class _HomePageState extends State<HomePage> {
         comfortableLevel: 0.4,
         maxTrials: 30,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (id == 'speed_training') {
       _pushPage(CompressedTrainingPage(
         comfortableLevel: 0.4,
         maxTrials: 20,
         audioPort: JustAudioPort(),
-        onCompleted: (s) =>
-            _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+        onCompleted: (s) => _persistRun(
+            s.moduleId, s.groupId, s.mode.name, s.records,
+            session: s),
       ));
     } else if (id == 'working_memory') {
       _pushPage(WorkingMemoryPage(
@@ -2486,7 +2537,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Opens the explainable recommendation for the last persisted profile.
-  void _openRecommendation() {    final pid = _lastProfileId;
+  void _openRecommendation() {
+    final pid = _lastProfileId;
     if (pid == null) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -2531,39 +2583,44 @@ class _HomePageState extends State<HomePage> {
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 1:
         page = CompressedTrainingPage(
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 2:
         page = PhonemicContrastPage(
           comfortableLevel: 0.4,
           maxTrials: 30,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 3:
         page = ClosureTrainingPage(
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 4:
         page = ContinuumPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 5:
         page = WorkingMemoryPage(
@@ -2576,8 +2633,9 @@ class _HomePageState extends State<HomePage> {
         page = FollowingDirectionsPage(
           comfortableLevel: 0.4,
           maxTrials: 15,
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 7:
         page = VocoderPage(
@@ -2585,16 +2643,18 @@ class _HomePageState extends State<HomePage> {
           maxTrials: 20,
           difficulty: chosen,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 8:
         page = SpatialPage(
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 9:
         page = VowelTrainingPage(
@@ -2613,8 +2673,9 @@ class _HomePageState extends State<HomePage> {
           comfortableLevel: 0.4,
           maxTrials: 20,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 12:
         page = ProsodyPage(
@@ -2649,22 +2710,25 @@ class _HomePageState extends State<HomePage> {
       case 17:
         page = PhonologicalPage(
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 18:
         page = ScenePage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 19:
         page = InterhemisphericPage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       case 20:
         page = SpeechTrackingPage(
@@ -2677,8 +2741,9 @@ class _HomePageState extends State<HomePage> {
         page = SentenceClosurePage(
           comfortableLevel: 0.4,
           audioPort: JustAudioPort(),
-          onCompleted: (s) =>
-              _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+          onCompleted: (s) => _persistRun(
+              s.moduleId, s.groupId, s.mode.name, s.records,
+              session: s),
         );
       default:
         return;
@@ -2703,17 +2768,30 @@ class _HomePageState extends State<HomePage> {
       poolOptions: <WordListPool>[demo, ...kCncLists, ...kNu6Lists],
       poolLabel: 'Demo',
       audioPort: JustAudioPort(),
-      onCompleted: (s) =>
-          _persistRun(s.moduleId, s.groupId, s.mode.name, s.records, session: s),
+      onCompleted: (s) => _persistRun(
+          s.moduleId, s.groupId, s.mode.name, s.records,
+          session: s),
     );
   }
 
   /// Quick-start: pick a random training exercise.
   void _launchRandomTraining() =>
-      _launchTraining(Random().nextInt(kTrainingModules.length));
+      _launchTraining(Random().nextInt(_kTrainingModules.length));
 
   /// Quick-start: jump to the Report tab in the bottom navigation.
   void _viewReport() => setState(() => _tabIndex = 4);
+
+  void _openIntroduction() {
+    _pushPage(
+      OnboardingPage(
+        onFinished: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        },
+      ),
+    );
+  }
 
   /// Quick-start: run the "Screening" CAPD battery preset. Shows the difficulty
   /// selector first, then pushes each mapped test in turn; when the listener
@@ -2759,7 +2837,8 @@ class _HomePageState extends State<HomePage> {
             responseMode: PatternResponseMode.labels,
             audioPort: JustAudioPort(),
             onCompleted: (s) => _persistRun(
-                s.moduleId, s.groupId, 'test', s.records, session: s));
+                s.moduleId, s.groupId, 'test', s.records,
+                session: s));
       case 'FPT':
         return PatternTestPage(
             testType: 'fpt',
@@ -2768,7 +2847,8 @@ class _HomePageState extends State<HomePage> {
             responseMode: PatternResponseMode.labels,
             audioPort: JustAudioPort(),
             onCompleted: (s) => _persistRun(
-                s.moduleId, s.groupId, 'test', s.records, session: s));
+                s.moduleId, s.groupId, 'test', s.records,
+                session: s));
       case 'MLD':
         return MldTestPage(
             maxTrialsPerCondition: 15,
@@ -2793,55 +2873,173 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _tabIndex,
-        children: [
-          _buildHomeTab(),
-          _buildTestsTab(),
-          _buildTrainingTab(),
-          _buildTinnitusTab(),
-          const ReportTabPage(),
-          const SettingsPage(),
-        ],
+    final pages = <Widget>[
+      _buildHomeTab(),
+      _buildTestsTab(),
+      _buildTrainingTab(),
+      _buildTinnitusTab(),
+      ReportTabPage(
+        onStartTests: () => setState(() => _tabIndex = 1),
+        onOpenIntroduction: _openIntroduction,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tabIndex,
-        onDestinationSelected: (i) => setState(() => _tabIndex = i),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+      const SettingsPage(),
+    ];
+    final content = IndexedStack(index: _tabIndex, children: pages);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= 900) {
+          return Scaffold(
+            body: Row(
+              children: [
+                SafeArea(
+                  child: NavigationRail(
+                    extended: constraints.maxWidth >= 1180,
+                    selectedIndex: _tabIndex,
+                    onDestinationSelected: (i) => setState(() => _tabIndex = i),
+                    leading: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: IconButton.filled(
+                        tooltip: 'Introduction',
+                        onPressed: _openIntroduction,
+                        icon: const Icon(Icons.graphic_eq),
+                      ),
+                    ),
+                    destinations: const [
+                      NavigationRailDestination(
+                        icon: Icon(Icons.home_outlined),
+                        selectedIcon: Icon(Icons.home),
+                        label: Text('Home'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.hearing_outlined),
+                        selectedIcon: Icon(Icons.hearing),
+                        label: Text('Tests'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.fitness_center_outlined),
+                        selectedIcon: Icon(Icons.fitness_center),
+                        label: Text('Training'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.spa_outlined),
+                        selectedIcon: Icon(Icons.spa),
+                        label: Text('Tinnitus'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.description_outlined),
+                        selectedIcon: Icon(Icons.description),
+                        label: Text('Reports'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.settings_outlined),
+                        selectedIcon: Icon(Icons.settings),
+                        label: Text('Settings'),
+                      ),
+                    ],
+                  ),
+                ),
+                const VerticalDivider(width: 1),
+                Expanded(child: content),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: content,
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _compactNavigationIndex,
+            onDestinationSelected: _selectCompactDestination,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.hearing_outlined),
+                selectedIcon: Icon(Icons.hearing),
+                label: 'Tests',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.fitness_center_outlined),
+                selectedIcon: Icon(Icons.fitness_center),
+                label: 'Train',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.description_outlined),
+                selectedIcon: Icon(Icons.description),
+                label: 'Reports',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.more_horiz),
+                label: 'More',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.hearing_outlined),
-            selectedIcon: Icon(Icons.hearing),
-            label: 'Tests',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.fitness_center),
-            selectedIcon: Icon(Icons.fitness_center),
-            label: 'Training',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.spa_outlined),
-            selectedIcon: Icon(Icons.spa),
-            label: 'Tinnitus',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.description_outlined),
-            selectedIcon: Icon(Icons.description),
-            label: 'Report',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  int get _compactNavigationIndex => switch (_tabIndex) {
+        0 => 0,
+        1 => 1,
+        2 => 2,
+        4 => 3,
+        _ => 4,
+      };
+
+  void _selectCompactDestination(int index) {
+    switch (index) {
+      case 0:
+        setState(() => _tabIndex = 0);
+      case 1:
+        setState(() => _tabIndex = 1);
+      case 2:
+        setState(() => _tabIndex = 2);
+      case 3:
+        setState(() => _tabIndex = 4);
+      case 4:
+        _showCompactMore();
+    }
+  }
+
+  Future<void> _showCompactMore() async {
+    final selected = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.spa_outlined),
+              title: const Text('Tinnitus and sound comfort'),
+              onTap: () => Navigator.of(context).pop(3),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Settings'),
+              onTap: () => Navigator.of(context).pop(5),
+            ),
+            ListTile(
+              leading: const Icon(Icons.menu_book_outlined),
+              title: const Text('Introduction'),
+              onTap: () => Navigator.of(context).pop(6),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
+    if (!mounted || selected == null) return;
+    if (selected == 6) {
+      _openIntroduction();
+    } else {
+      setState(() => _tabIndex = selected);
+    }
   }
 
   /// Home tab: the hero, quick-start row and the full module + training grids.
@@ -3055,9 +3253,9 @@ class _HomePageState extends State<HomePage> {
                   crossAxisSpacing: 12,
                   childAspectRatio: 2.6,
                   children: [
-                    for (var i = 0; i < kTrainingModules.length; i++)
+                    for (var i = 0; i < _kTrainingModules.length; i++)
                       _TrainingCard(
-                        module: kTrainingModules[i],
+                        module: _kTrainingModules[i],
                         onTap: () => _launchTraining(i),
                       ),
                   ],
@@ -3100,8 +3298,8 @@ class _HomePageState extends State<HomePage> {
                         decoration: BoxDecoration(
                           color: color.withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color: color.withValues(alpha: 0.4)),
+                          border:
+                              Border.all(color: color.withValues(alpha: 0.4)),
                         ),
                         child: Icon(icon, color: color),
                       ),
@@ -3148,23 +3346,36 @@ class _HomePageState extends State<HomePage> {
                       color: Color(0xff94a3b8), fontSize: 13, height: 1.4),
                 ),
                 const SizedBox(height: 16),
-                tile(Icons.graphic_eq, const Color(0xff3b82f6), 'Pitch match',
+                tile(
+                    Icons.graphic_eq,
+                    const Color(0xff3b82f6),
+                    'Pitch match',
                     'Find your tinnitus frequency (2AFC)',
-                    () => _pushPage(PitchMatchPage(audioPort: JustAudioPort()))),
-                tile(Icons.volume_up, const Color(0xff8b5cf6),
+                    () =>
+                        _pushPage(PitchMatchPage(audioPort: JustAudioPort()))),
+                tile(
+                    Icons.volume_up,
+                    const Color(0xff8b5cf6),
                     'Loudness match',
                     'Match your tinnitus loudness (dB SL)',
                     () => _pushPage(
                         LoudnessMatchPage(audioPort: JustAudioPort()))),
-                tile(Icons.blur_on, const Color(0xff06b6d4),
+                tile(
+                    Icons.blur_on,
+                    const Color(0xff06b6d4),
                     'Minimum masking level',
                     'Find the noise level that covers it',
                     () => _pushPage(MmlPage(audioPort: JustAudioPort()))),
-                tile(Icons.spa, const Color(0xff22c55e), 'Sound therapy',
+                tile(
+                    Icons.spa,
+                    const Color(0xff22c55e),
+                    'Sound therapy',
                     'White/pink/brown noise, rain, ocean + notch',
                     () => _pushPage(
                         SoundTherapyPage(audioPort: JustAudioPort()))),
-                tile(Icons.warning_amber, const Color(0xfffbbf24),
+                tile(
+                    Icons.warning_amber,
+                    const Color(0xfffbbf24),
                     'Loudness discomfort (LDL)',
                     'Hyperacusis screen — safety-capped',
                     () => _pushPage(LdlPage(
@@ -3173,7 +3384,9 @@ class _HomePageState extends State<HomePage> {
                               s.moduleId, s.groupId, 'test', s.records,
                               session: s),
                         ))),
-                tile(Icons.timer_outlined, const Color(0xfff87171),
+                tile(
+                    Icons.timer_outlined,
+                    const Color(0xfff87171),
                     'Residual inhibition',
                     'One-minute masker, then time the after-effect',
                     () => _pushPage(ResidualInhibitionPage(
@@ -3182,20 +3395,28 @@ class _HomePageState extends State<HomePage> {
                               s.moduleId, s.groupId, 'test', s.records,
                               session: s),
                         ))),
-                tile(Icons.trending_up, const Color(0xff34d399),
+                tile(
+                    Icons.trending_up,
+                    const Color(0xff34d399),
                     'Sound comfort program',
                     '14-day graded desensitization below your LDL',
                     () => _pushPage(
                         DesensitizationPage(audioPort: JustAudioPort()))),
-                tile(Icons.menu_book_outlined, const Color(0xff93c5fd),
+                tile(
+                    Icons.menu_book_outlined,
+                    const Color(0xff93c5fd),
                     'Understanding tinnitus',
                     'The habituation model behind TRT, in plain language',
                     () => _pushPage(const TrtEducationPage())),
-                tile(Icons.assignment_outlined, const Color(0xffc4b5fd),
+                tile(
+                    Icons.assignment_outlined,
+                    const Color(0xffc4b5fd),
                     'THI questionnaire',
                     'Tinnitus Handicap Inventory (25 items)',
                     () => _pushPage(const ThiPage())),
-                tile(Icons.assignment_outlined, const Color(0xff8b9bb4),
+                tile(
+                    Icons.assignment_outlined,
+                    const Color(0xff8b9bb4),
                     'Tinnitus impact (TFI-style)',
                     'Paraphrased 8-domain impact screen',
                     () => _pushPage(const TfiPage())),
@@ -3396,9 +3617,9 @@ class _CatalogView extends StatelessWidget {
               crossAxisSpacing: 12,
               childAspectRatio: 2.6,
               children: [
-                for (var i = 0; i < kTrainingModules.length; i++)
+                for (var i = 0; i < _kTrainingModules.length; i++)
                   _TrainingCard(
-                    module: kTrainingModules[i],
+                    module: _kTrainingModules[i],
                     favoriteIndex: i,
                     onTap: () => onLaunchTraining(i),
                   ),
@@ -3500,9 +3721,9 @@ class _QuickStartCard extends StatelessWidget {
                   height: 40,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.18),
+                    color: color.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: color.withOpacity(0.4)),
+                    border: Border.all(color: color.withValues(alpha: 0.4)),
                   ),
                   child: Icon(icon, color: color, size: 22),
                 ),
@@ -3630,7 +3851,8 @@ class _PlannerHomeCardState extends State<_PlannerHomeCard> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                color: statusColor(top.status).withOpacity(0.5),
+                                color: statusColor(top.status)
+                                    .withValues(alpha: 0.5),
                                 blurRadius: 8),
                           ],
                         ),
@@ -3768,8 +3990,8 @@ class _HeroHeader extends StatelessWidget {
                   color: const Color(0x33ffffff),
                   borderRadius: BorderRadius.circular(13),
                 ),
-                child: const Icon(Icons.graphic_eq,
-                    color: Colors.white, size: 26),
+                child:
+                    const Icon(Icons.graphic_eq, color: Colors.white, size: 26),
               ),
               const SizedBox(width: 13),
               const Column(
@@ -3961,7 +4183,7 @@ class _ModuleCard extends StatelessWidget {
                     Text(
                       p.tagline,
                       style: const TextStyle(
-                        color: const Color(0xff94a3b8),
+                        color: Color(0xff94a3b8),
                         fontSize: 13,
                         height: 1.25,
                       ),
@@ -4032,20 +4254,20 @@ class _FavoritesRow extends StatelessWidget {
           if (favorites.contains(moduleFavoriteId(module.id))) {
             chips.add(ActionChip(
               key: Key('favchip-module-${module.id}'),
-              avatar: const Icon(Icons.star,
-                  size: 16, color: Color(0xfffbbf24)),
+              avatar:
+                  const Icon(Icons.star, size: 16, color: Color(0xfffbbf24)),
               label: Text(module.name),
               onPressed: () => onOpenModule(catalog, module),
             ));
           }
         }
-        for (var i = 0; i < kTrainingModules.length; i++) {
+        for (var i = 0; i < _kTrainingModules.length; i++) {
           if (favorites.contains(trainingFavoriteId(i))) {
             chips.add(ActionChip(
               key: Key('favchip-training-$i'),
-              avatar: const Icon(Icons.star,
-                  size: 16, color: Color(0xfffbbf24)),
-              label: Text(kTrainingModules[i].title),
+              avatar:
+                  const Icon(Icons.star, size: 16, color: Color(0xfffbbf24)),
+              label: Text(_kTrainingModules[i].title),
               onPressed: () => onLaunchTraining(i),
             ));
           }
@@ -4091,8 +4313,7 @@ class _FavoriteStar extends StatelessWidget {
           icon: Icon(
             isFav ? Icons.star : Icons.star_border,
             size: 20,
-            color:
-                isFav ? const Color(0xfffbbf24) : const Color(0xff8b9bb4),
+            color: isFav ? const Color(0xfffbbf24) : const Color(0xff8b9bb4),
           ),
         );
       },
@@ -4119,8 +4340,8 @@ class ModuleThumbnailPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final colors = _palettes[moduleId] ??
-        const [Color(0xff1e293b), Color(0xff475569)];
+    final colors =
+        _palettes[moduleId] ?? const [Color(0xff1e293b), Color(0xff475569)];
     final rect = Offset.zero & size;
     canvas.drawRect(
       rect,
@@ -4154,8 +4375,8 @@ class ModuleThumbnailPainter extends CustomPainter {
         final dot = Paint()..color = Colors.white.withValues(alpha: 0.3);
         for (var i = 0; i < 14; i++) {
           canvas.drawCircle(
-            Offset(rng.nextDouble() * size.width,
-                rng.nextDouble() * size.height),
+            Offset(
+                rng.nextDouble() * size.width, rng.nextDouble() * size.height),
             1.6,
             dot,
           );
@@ -4493,8 +4714,8 @@ class _PracticeHeatmapCardState extends State<_PracticeHeatmapCard> {
     if (_total == 0) return const SizedBox.shrink();
     final today = DateTime.now();
     // Columns are weeks (oldest -> newest); rows Monday..Sunday.
-    final start = today
-        .subtract(Duration(days: (_weeks - 1) * 7 + (today.weekday - 1)));
+    final start =
+        today.subtract(Duration(days: (_weeks - 1) * 7 + (today.weekday - 1)));
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
       child: Container(
@@ -4626,8 +4847,8 @@ class _HomeSearchState extends State<_HomeSearch> {
         ));
       }
     }
-    for (var i = 0; i < kTrainingModules.length; i++) {
-      final t = kTrainingModules[i];
+    for (var i = 0; i < _kTrainingModules.length; i++) {
+      final t = _kTrainingModules[i];
       if ('${t.title} ${t.subtitle}'.toLowerCase().contains(q)) {
         hits.add(_SearchHit(
           'Training',
@@ -4686,8 +4907,7 @@ class _HomeSearchState extends State<_HomeSearch> {
           if (hits.isEmpty)
             const Padding(
               padding: EdgeInsets.all(10),
-              child: Text(
-                  'No matches. Try "noise", "pitch", "dichotic"…',
+              child: Text('No matches. Try "noise", "pitch", "dichotic"…',
                   style: TextStyle(color: Color(0xff94a3b8), fontSize: 13)),
             )
           else

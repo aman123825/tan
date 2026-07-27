@@ -331,7 +331,7 @@ class _FeedbackLine extends StatelessWidget {
         if (!correct) ...[
           const SizedBox(height: 6),
           Text('The sequence was $target',
-              style: const TextStyle(color: const Color(0xff94a3b8))),
+              style: const TextStyle(color: Color(0xff94a3b8))),
         ],
       ],
     );
@@ -351,7 +351,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),

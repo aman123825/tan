@@ -66,12 +66,20 @@ TrendDirection trendFromSlope(double slopePointsPerSession,
 /// Reads completed sessions from [SessionHistory]. Tests may inject [records]
 /// directly to avoid the async SharedPreferences load.
 class TrendPage extends StatefulWidget {
-  const TrendPage({super.key, this.history, this.records});
+  const TrendPage({
+    super.key,
+    this.history,
+    this.records,
+    this.embedded = false,
+  });
 
   final SessionHistory? history;
 
   /// Optional pre-loaded records (bypasses [history] when provided).
   final List<SessionRecord>? records;
+
+  /// Removes the page scaffold when rendered inside the Report center.
+  final bool embedded;
 
   @override
   State<TrendPage> createState() => _TrendPageState();
@@ -108,31 +116,33 @@ class _TrendPageState extends State<TrendPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final records = _records;
+    final body = records == null
+        ? const Center(child: CircularProgressIndicator())
+        : records.isEmpty
+            ? _empty(theme)
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text('Progress over time, per test',
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text(
+                      'Adaptive tests plot their measured threshold '
+                      '(lower is better); other tests plot accuracy. Trend '
+                      'line is an ordinary least-squares fit. Research '
+                      'measurement only — not a diagnosis.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 12),
+                  for (final entry in _byTest(records).entries)
+                    _TrendCard(title: entry.key, sessions: entry.value),
+                ],
+              );
+    if (widget.embedded) return body;
     return Scaffold(
       appBar: AppBar(title: const Text('Progress trends')),
-      body: records == null
-          ? const Center(child: CircularProgressIndicator())
-          : records.isEmpty
-              ? _empty(theme)
-              : ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    Text('Progress over time, per test',
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text(
-                        'Adaptive tests plot their measured threshold '
-                        '(lower is better); other tests plot accuracy. Trend '
-                        'line is an ordinary least-squares fit. Research '
-                        'measurement only — not a diagnosis.',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: const Color(0xff94a3b8))),
-                    const SizedBox(height: 12),
-                    for (final entry in _byTest(records).entries)
-                      _TrendCard(title: entry.key, sessions: entry.value),
-                  ],
-                ),
+      body: body,
     );
   }
 
@@ -142,8 +152,7 @@ class _TrendPageState extends State<TrendPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.show_chart,
-                  size: 48, color: Color(0xff8b9bb4)),
+              const Icon(Icons.show_chart, size: 48, color: Color(0xff8b9bb4)),
               const SizedBox(height: 12),
               Text('No sessions recorded yet',
                   style: theme.textTheme.titleMedium),
@@ -170,17 +179,15 @@ class _TrendCard extends StatelessWidget {
   String? get _metricUnit {
     final unit = sessions.first.metricUnit;
     if (unit == null) return null;
-    final allSame = sessions
-        .every((s) => s.metricValue != null && s.metricUnit == unit);
+    final allSame =
+        sessions.every((s) => s.metricValue != null && s.metricUnit == unit);
     return allSame ? unit : null;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final xs = <double>[
-      for (var i = 0; i < sessions.length; i++) i.toDouble()
-    ];
+    final xs = <double>[for (var i = 0; i < sessions.length; i++) i.toDouble()];
     final unit = _metricUnit;
     final ys = unit != null
         ? <double>[for (final s in sessions) s.metricValue!]
@@ -196,8 +203,7 @@ class _TrendCard extends StatelessWidget {
     if (unit != null) {
       final meanAbs =
           ys.map((y) => y.abs()).reduce((a, b) => a + b) / ys.length;
-      classificationSlope =
-          slope / (meanAbs < 1e-9 ? 1 : meanAbs) * 100;
+      classificationSlope = slope / (meanAbs < 1e-9 ? 1 : meanAbs) * 100;
       if (sessions.first.higherIsBetter == false) {
         classificationSlope = -classificationSlope;
       }
@@ -235,8 +241,8 @@ class _TrendCard extends StatelessWidget {
             const SizedBox(height: 12),
             SizedBox(
               height: 170,
-              child: LineChart(
-                  _chartData(xs, ys, slope, intercept, fixedScale: unit == null)),
+              child: LineChart(_chartData(xs, ys, slope, intercept,
+                  fixedScale: unit == null)),
             ),
           ],
         ),
@@ -254,7 +260,8 @@ class _TrendCard extends StatelessWidget {
     if (!fixedScale) {
       final lo = ys.reduce((a, b) => a < b ? a : b);
       final hi = ys.reduce((a, b) => a > b ? a : b);
-      final pad = (hi - lo).abs() < 1e-9 ? (hi.abs() * 0.2 + 1) : (hi - lo) * 0.2;
+      final pad =
+          (hi - lo).abs() < 1e-9 ? (hi.abs() * 0.2 + 1) : (hi - lo) * 0.2;
       minY = lo - pad;
       maxY = hi + pad;
     }
@@ -264,7 +271,8 @@ class _TrendCard extends StatelessWidget {
     final trendSpots = xs.length >= 2
         ? [
             FlSpot(0, intercept.clamp(minY, maxY).toDouble()),
-            FlSpot(maxX, (intercept + slope * maxX).clamp(minY, maxY).toDouble()),
+            FlSpot(
+                maxX, (intercept + slope * maxX).clamp(minY, maxY).toDouble()),
           ]
         : <FlSpot>[];
 

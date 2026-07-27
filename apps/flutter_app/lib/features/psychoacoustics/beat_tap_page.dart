@@ -182,13 +182,25 @@ class _BeatTapPageState extends State<BeatTapPage> {
     Widget row(String label, String value) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 7),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
-              Text(value,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xffe2e8f0))),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Flexible(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
             ],
           ),
         );

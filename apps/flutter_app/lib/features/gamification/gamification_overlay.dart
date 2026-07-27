@@ -261,7 +261,7 @@ class _BadgeCelebrationSheet extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xff3b82f6).withOpacity(0.5),
+                        color: const Color(0xff3b82f6).withValues(alpha: 0.5),
                         blurRadius: 30,
                         spreadRadius: 2,
                       ),
@@ -395,7 +395,7 @@ class _ConfettiPainter extends CustomPainter {
       final dx = cos(p.angle) * dist + sin(t * 6 + p.wobble) * 4;
       final dy = sin(p.angle) * dist + 40 * t * t;
       final opacity = (1.0 - t).clamp(0.0, 1.0);
-      paint.color = p.color.withOpacity(opacity);
+      paint.color = p.color.withValues(alpha: opacity);
       canvas.drawCircle(center + Offset(dx, dy), p.size * (1 - t * 0.4), paint);
     }
   }

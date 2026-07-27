@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../../core/audio/audio_port.dart';
 import '../../core/mci.dart';
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Melodic Contour Identification (9-choice) renderer using the shipped
@@ -64,6 +65,7 @@ class _MciPageState extends State<MciPage> {
   bool _finished = false;
   Timer? _autoAdvanceTimer;
   Timer? _autoPlayTimer;
+  Uint8List? _lastWav;
 
   static const int _maxReplays = 5;
   final Stopwatch _sessionSw = Stopwatch()..start();
@@ -77,6 +79,7 @@ class _MciPageState extends State<MciPage> {
   void _finish() {
     if (_finished) return;
     _autoAdvanceTimer?.cancel();
+    _autoPlayTimer?.cancel();
     setState(() => _finished = true);
     widget.onCompleted?.call(_session);
   }
@@ -102,6 +105,7 @@ class _MciPageState extends State<MciPage> {
       _played = false;
       _chosen = null;
       _lastCorrect = null;
+      _lastWav = null;
     });
     _scheduleAutoPlay();
   }
@@ -111,7 +115,7 @@ class _MciPageState extends State<MciPage> {
   /// played; the Play button remains a first-trial fallback.
   void _scheduleAutoPlay() {
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer(const Duration(seconds: 2), () {
+    _autoPlayTimer = Timer(kTrialPrePlayDelay, () {
       if (mounted && !_played) _play();
     });
   }
@@ -127,8 +131,9 @@ class _MciPageState extends State<MciPage> {
       }
     });
     try {
-      final bytes = await _loadAsset(trial.assetFor(trial.targetIndex));
-      await _audio.playWav(bytes);
+      final wav = await _loadAsset(trial.assetFor(trial.targetIndex));
+      _lastWav = wav;
+      await _audio.playWav(wav);
     } catch (_) {
       // Asset/playback failure must not block the exercise.
     }
@@ -150,15 +155,36 @@ class _MciPageState extends State<MciPage> {
       _chosen = index;
       _lastCorrect = correct;
     });
-    // Show feedback briefly, then auto-advance; Next remains a manual override.
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1500), () {
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
+  }
+
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosen == null) return;
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosen != null) _advance();
     });
   }
 
   void _advance() {
     _autoAdvanceTimer?.cancel();
+    _autoPlayTimer?.cancel();
     if (_session.isComplete) {
       _finish();
     } else {
@@ -306,7 +332,8 @@ class _MciPageState extends State<MciPage> {
             label: 'Accuracy', value: '${(_session.accuracy * 100).round()}%'),
         const SizedBox(height: 12),
         Text('Research measurement only — not a diagnosis.',
-            style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8))),
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: const Color(0xff94a3b8))),
         const SizedBox(height: 20),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_session),
@@ -357,7 +384,8 @@ class _ContourButton extends StatelessWidget {
                       fontSize: 24, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
               Text(contourLabel(pattern),
-                  style: const TextStyle(fontSize: 12, color: const Color(0xffe2e8f0))),
+                  style: const TextStyle(
+                      fontSize: 12, color: Color(0xffe2e8f0))),
             ],
           ),
         ),
@@ -390,7 +418,7 @@ class _FeedbackLine extends StatelessWidget {
         if (!correct) ...[
           const SizedBox(height: 6),
           Text('It was “$answer”',
-              style: const TextStyle(color: const Color(0xff94a3b8))),
+              style: const TextStyle(color: Color(0xff94a3b8))),
         ],
       ],
     );
@@ -410,7 +438,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),

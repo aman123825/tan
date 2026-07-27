@@ -269,9 +269,9 @@ class _ExerciseTile extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.16),
+                    color: color.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(9),
-                    border: Border.all(color: color.withOpacity(0.5)),
+                    border: Border.all(color: color.withValues(alpha: 0.5)),
                   ),
                   child: Text(statusLabel(item.status),
                       style: TextStyle(
@@ -302,7 +302,7 @@ class _StatusDot extends StatelessWidget {
         color: color,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.5), blurRadius: 8),
+          BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 8),
         ],
       ),
     );

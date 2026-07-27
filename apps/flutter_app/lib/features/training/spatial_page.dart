@@ -424,7 +424,7 @@ class _PositionDot extends StatelessWidget {
       bg = const Color(0x33ef4444);
       border = _bad;
     } else if (enabled) {
-      border = _primary.withOpacity(0.7);
+      border = _primary.withValues(alpha: 0.7);
     }
     return Semantics(
       button: true,

@@ -109,7 +109,7 @@ class _BatteryRunnerPageState extends State<BatteryRunnerPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(r.label, style: const TextStyle(color: const Color(0xff94a3b8))),
+                Text(r.label, style: const TextStyle(color: Color(0xff94a3b8))),
                 Text('${(r.accuracy * 100).round()}%',
                     style: const TextStyle(fontWeight: FontWeight.w700)),
               ],

@@ -9,6 +9,7 @@ import '../../core/audio/pcm_synth.dart';
 import '../../core/dichotic.dart';
 import '../catalog/validation_badge.dart';
 import '../common/norm_tile.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Dichotic-digits renderer: a different digit plays in each ear at once.
@@ -80,6 +81,7 @@ class _DichoticPageState extends State<DichoticPage> {
   bool _finished = false;
   Timer? _autoAdvanceTimer;
   Timer? _autoPlayTimer;
+  Uint8List? _lastWav;
 
   bool get _isFreeRecall => widget.mode == DichoticMode.freeRecall;
 
@@ -122,6 +124,7 @@ class _DichoticPageState extends State<DichoticPage> {
       _chosenDigits.clear();
       _answered = false;
       _lastCorrect = null;
+      _lastWav = null;
     });
     _scheduleAutoPlay();
   }
@@ -131,7 +134,7 @@ class _DichoticPageState extends State<DichoticPage> {
   /// played; the Play button remains a first-trial fallback.
   void _scheduleAutoPlay() {
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer(const Duration(seconds: 2), () {
+    _autoPlayTimer = Timer(kTrialPrePlayDelay, () {
       if (mounted && !_played) _play();
     });
   }
@@ -152,8 +155,9 @@ class _DichoticPageState extends State<DichoticPage> {
       final r = decodeWav16(await _loadAsset(
           'assets/stimuli/digits/digit_${trial.rightDigit}.wav'));
       final rate = l.sampleRate;
-      await _audio
-          .playWav(encodeWavStereo16(l.samples, r.samples, sampleRate: rate));
+      final wav = encodeWavStereo16(l.samples, r.samples, sampleRate: rate);
+      _lastWav = wav;
+      await _audio.playWav(wav);
     } catch (_) {
       // Missing asset / playback failure must not block the exercise.
     }
@@ -187,7 +191,7 @@ class _DichoticPageState extends State<DichoticPage> {
       _answered = true;
       _lastCorrect = correct;
     });
-    _scheduleAutoAdvance();
+    _scheduleAutoAdvance(correct);
   }
 
   void _scoreFreeRecall(DichoticTrial trial) {
@@ -201,20 +205,42 @@ class _DichoticPageState extends State<DichoticPage> {
       _answered = true;
       _lastCorrect = correct;
     });
-    _scheduleAutoAdvance();
+    _scheduleAutoAdvance(correct);
   }
 
   /// Show feedback briefly, then auto-advance; Next remains a manual override.
   /// Cancelled on dispose / manual advance / stop so no timer leaks.
-  void _scheduleAutoAdvance() {
+  void _scheduleAutoAdvance(bool correct) {
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1500), () {
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _answered) _advance();
+      });
+    }
+  }
+
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || !_answered) return;
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _answered) _advance();
     });
   }
 
   void _advance() {
     _autoAdvanceTimer?.cancel();
+    _autoPlayTimer?.cancel();
     if (_session.isComplete) {
       _finish();
     } else {
@@ -225,6 +251,7 @@ class _DichoticPageState extends State<DichoticPage> {
   void _finish() {
     if (_finished) return;
     _autoAdvanceTimer?.cancel();
+    _autoPlayTimer?.cancel();
     setState(() => _finished = true);
     widget.onCompleted?.call(_session);
   }
@@ -411,8 +438,9 @@ class _DichoticPageState extends State<DichoticPage> {
         const SizedBox(height: 14),
         Text('Left ear (per-ear norm)', style: theme.textTheme.labelLarge),
         const SizedBox(height: 6),
-        NormTile(Norms.dichoticPercent(
-            _session.completedTrials == 0 ? null : _session.leftAccuracy * 100)),
+        NormTile(Norms.dichoticPercent(_session.completedTrials == 0
+            ? null
+            : _session.leftAccuracy * 100)),
         const SizedBox(height: 10),
         Text('Right ear (per-ear norm)', style: theme.textTheme.labelLarge),
         const SizedBox(height: 6),

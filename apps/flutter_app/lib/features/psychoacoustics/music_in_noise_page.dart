@@ -10,6 +10,7 @@ import '../../core/audio/timbre.dart';
 import '../../core/speech_in_noise.dart';
 import '../../core/training/scene_training.dart' show multiTalkerBabble;
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Masker options for music-in-noise (K3/K4): speech-derived babble built
@@ -64,6 +65,10 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
   bool? _lastCorrect;
   bool _finished = false;
   Timer? _autoAdvanceTimer;
+  Timer? _prePlayTimer;
+
+  /// The exact presented buffer (for wrong-answer replays).
+  Uint8List? _lastWav;
   final List<bool> _results = <bool>[];
   final Stopwatch _sw = Stopwatch()..start();
 
@@ -78,6 +83,7 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
   @override
   void dispose() {
     _autoAdvanceTimer?.cancel();
+    _prePlayTimer?.cancel();
     super.dispose();
   }
 
@@ -89,8 +95,13 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
       _played = false;
       _chosenIndex = null;
       _lastCorrect = null;
+      _lastWav = null;
     });
-    unawaited(_play());
+    // Short breathing room, then the next tune auto-plays.
+    _prePlayTimer?.cancel();
+    _prePlayTimer = Timer(kTrialPrePlayDelay, () {
+      if (mounted && !_finished && _chosenIndex == null) unawaited(_play());
+    });
   }
 
   Future<void> _play() async {
@@ -109,10 +120,11 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
       // SAFETY: only the melody-to-masker SNR adapts; the peak-normalized
       // mix never boosts master volume.
       final mixed = mixAtSnr(melody, masker, _session.currentSnrDb);
-      await _audio.playWav(encodeWav16(mixed));
+      final wav = encodeWav16(mixed);
+      _lastWav = wav; // exact bytes for wrong-answer replays
+      await _audio.playWav(wav);
     } catch (_) {}
   }
-
 
   /// The chosen masker at [seconds] length. The speech-babble asset (24 kHz)
   /// is upsampled by simple repetition to the synth rate; load failures fall
@@ -127,21 +139,17 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
           _babbleAsset ??= await _loadBabbleAsset();
           final src = _babbleAsset!;
           final n = (seconds * kSampleRate).round();
-          final start = (widget.seed * 131 +
-                  _session.completedTrials * 977) %
-              src.length;
-          return List<double>.generate(
-              n, (i) => src[(start + i) % src.length]);
+          final start =
+              (widget.seed * 131 + _session.completedTrials * 977) % src.length;
+          return List<double>.generate(n, (i) => src[(start + i) % src.length]);
         } catch (_) {
           // Asset unavailable (tests / stripped bundles): synthetic babble.
         }
         return multiTalkerBabble(
-            seconds: seconds,
-            seed: widget.seed + _session.completedTrials);
+            seconds: seconds, seed: widget.seed + _session.completedTrials);
       case MusicMasker.syntheticBabble:
         return multiTalkerBabble(
-            seconds: seconds,
-            seed: widget.seed + _session.completedTrials);
+            seconds: seconds, seed: widget.seed + _session.completedTrials);
     }
   }
 
@@ -155,8 +163,8 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
     final decoded = decodeWav16(bytes.buffer.asUint8List());
     final factor = (kSampleRate / decoded.sampleRate).round().clamp(1, 4);
     if (factor == 1) return decoded.samples;
-    return List<double>.generate(decoded.samples.length * factor,
-        (i) => decoded.samples[i ~/ factor]);
+    return List<double>.generate(
+        decoded.samples.length * factor, (i) => decoded.samples[i ~/ factor]);
   }
 
   void _choose(int index) {
@@ -176,8 +184,35 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
       _lastCorrect = correct;
       _results.add(correct);
     });
+    // Hands-free flow: a wrong answer re-plays the tune twice, then the next
+    // question follows automatically after a short pause.
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1300), () {
+    if (!correct) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosenIndex != null) _advance();
+      });
+    }
+  }
+
+  /// Wrong-answer sequence: replay the exact presented mix twice, a brief
+  /// beat, then advance automatically.
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosenIndex == null) return;
+    // Cancellable beat before advancing (a raw Future.delayed would leak a
+    // timer past dispose).
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosenIndex != null) _advance();
     });
   }
@@ -222,8 +257,7 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
           'recognise familiar tunes — the musical counterpart of the '
           'words-in-noise test.',
       pills: [
-        MetaPill(
-            text: 'SNR ${_session.currentSnrDb.toStringAsFixed(0)} dB'),
+        MetaPill(text: 'SNR ${_session.currentSnrDb.toStringAsFixed(0)} dB'),
         MetaPill(
             icon: Icons.tag,
             text: 'Trial ${_session.trialNumber}/${widget.maxTrials}'),
@@ -283,8 +317,7 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
                 const SizedBox(height: 8),
                 FilledButton(
                   onPressed: _advance,
-                  child:
-                      Text(_session.isComplete ? 'See results' : 'Next'),
+                  child: Text(_session.isComplete ? 'See results' : 'Next'),
                 ),
               ],
             )
@@ -305,9 +338,8 @@ class _MusicInNoisePageState extends State<MusicInNoisePage> {
                   label: kMelodyTitles[trial.choices[i]] ?? trial.choices[i],
                   enabled: _played && !answered,
                   correct: answered && i == trial.targetIndex,
-                  wrong: answered &&
-                      _chosenIndex == i &&
-                      i != trial.targetIndex,
+                  wrong:
+                      answered && _chosenIndex == i && i != trial.targetIndex,
                   onTap: () => _choose(i),
                 ),
             ],

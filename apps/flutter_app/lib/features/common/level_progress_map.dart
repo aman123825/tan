@@ -65,7 +65,7 @@ class LevelProgressMap extends StatelessWidget {
                 width: 10,
                 height: 2,
                 color: i <= completedLevels
-                    ? _done.withOpacity(0.5)
+                    ? _done.withValues(alpha: 0.5)
                     : const Color(0x33ffffff),
               ),
             _dotFor(i, reduced),
@@ -158,7 +158,7 @@ class _PulsingDotState extends State<_PulsingDot>
             color: widget.color,
             boxShadow: [
               BoxShadow(
-                color: widget.color.withOpacity(0.25 + 0.45 * t),
+                color: widget.color.withValues(alpha: 0.25 + 0.45 * t),
                 blurRadius: 4 + 6 * t,
                 spreadRadius: 1 + 2 * t,
               ),

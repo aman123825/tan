@@ -268,7 +268,7 @@ class _ResponseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? color.withOpacity(0.2) : const Color(0xff293548),
+      color: selected ? color.withValues(alpha: 0.2) : const Color(0xff293548),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(

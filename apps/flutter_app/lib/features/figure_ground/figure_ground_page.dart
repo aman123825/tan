@@ -8,12 +8,12 @@ import '../../core/audio/audio_port.dart';
 import '../../core/audio/pcm_synth.dart';
 import '../../core/audio/voice_variants.dart';
 import '../../core/figure_ground.dart';
-import '../../core/protocol_engine.dart'
-    show flagLastTrial, lastTrialFlagged;
+import '../../core/protocol_engine.dart' show flagLastTrial, lastTrialFlagged;
 import '../../core/speech_in_noise.dart'
     show FourAfcGenerator, FourAlternativeTrial;
 import '../catalog/validation_badge.dart';
 import '../common/level_meter.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 import '../speech_in_noise/speech_in_noise_page.dart' show kDemoWordPool;
 
@@ -96,7 +96,10 @@ class _FigureGroundPageState extends State<FigureGroundPage> {
       _chosenIndex = null;
     });
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer(const Duration(seconds: 2), () {
+    // 1.2 s breathing room, then the next word auto-plays. No wrong-answer
+    // replay here: this is a locked no-feedback test, and replaying only
+    // after errors would leak correctness.
+    _autoPlayTimer = Timer(kTrialPrePlayDelay, () {
       if (mounted && !_played) _play();
     });
   }
@@ -131,8 +134,8 @@ class _FigureGroundPageState extends State<FigureGroundPage> {
       if (mounted) {
         setState(() {
           _envelope = levelEnvelope(mixed);
-          _stimDuration = Duration(
-              milliseconds: mixed.length * 1000 ~/ speech.sampleRate);
+          _stimDuration =
+              Duration(milliseconds: mixed.length * 1000 ~/ speech.sampleRate);
           _playToken++;
         });
       }
@@ -159,7 +162,7 @@ class _FigureGroundPageState extends State<FigureGroundPage> {
       _results.add(correct);
     });
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 900), () {
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosenIndex != null) _advance();
     });
   }
@@ -213,7 +216,8 @@ class _FigureGroundPageState extends State<FigureGroundPage> {
           icon: Icons.tag,
           text: 'Word ${_session.trialInBlock}/${widget.trialsPerSnr}',
         ),
-        MetaPill(icon: Icons.record_voice_over, text: '${_voice.label} (proxy)'),
+        MetaPill(
+            icon: Icons.record_voice_over, text: '${_voice.label} (proxy)'),
         if (_envelope.isNotEmpty)
           StimulusLevelMeter(
             envelope: _envelope,

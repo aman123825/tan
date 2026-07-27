@@ -9,6 +9,7 @@ import '../../core/difficulty.dart';
 import '../../core/interval_task.dart';
 import '../../core/psychometrics.dart';
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 
 /// Builds the full N-interval trial audio for a given target interval and
 /// current adapted-parameter value.
@@ -110,6 +111,11 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
   bool _playing = false;
   bool _paused = false;
   Timer? _tick;
+
+  /// Pause before each new trial's audio starts (breathing room between
+  /// questions) and the timers driving the hands-free flow.
+  Timer? _prePlayTimer;
+  Timer? _autoAdvanceTimer;
   int _activeInterval = -1;
   final Stopwatch _sessionSw = Stopwatch()..start();
 
@@ -124,6 +130,8 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
   @override
   void dispose() {
     _tick?.cancel();
+    _prePlayTimer?.cancel();
+    _autoAdvanceTimer?.cancel();
     super.dispose();
   }
 
@@ -138,7 +146,12 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
       _lastWav = null;
       _paused = false;
     });
-    _present(); // auto-play the new trial; the listener never taps "play".
+    // Hands-free flow: a short pause, then the new trial auto-plays — the
+    // listener never taps "play".
+    _prePlayTimer?.cancel();
+    _prePlayTimer = Timer(kTrialPrePlayDelay, () {
+      if (mounted && !_finished && !_paused && _chosen == null) _present();
+    });
   }
 
   /// Builds, caches and auto-plays the stimulus for the current trial.
@@ -279,10 +292,34 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
       _chosen = index;
       _lastCorrect = correct;
     });
-    if (!correct && _session.showsFeedback) _replayOnFail();
+    // Hands-free flow: a wrong answer (training) re-plays the sounds twice,
+    // then the next question follows automatically; a correct answer moves
+    // on after a short feedback beat. Next stays as a manual override.
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer?.cancel();
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
+  }
+
+  /// Wrong-answer sequence: two full replays, a brief beat, then advance.
+  Future<void> _replayFailThenAdvance() async {
+    await _replayOnFail();
+    if (!mounted || _finished || _chosen == null) return;
+    // Cancellable beat before advancing (a raw Future.delayed would leak a
+    // timer past dispose).
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+      if (mounted && !_finished && _chosen != null) _advance();
+    });
   }
 
   void _advance() {
+    _autoAdvanceTimer?.cancel();
+    _prePlayTimer?.cancel();
     if (_session.isComplete) {
       _finish();
     } else {
@@ -481,8 +518,7 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
                 onResume: (_paused && !_playing && !answered) ? _resume : null,
                 onPause: _playing ? _pause : null,
                 onStop: (_playing || _paused) ? _stop : null,
-                onReplay:
-                    (idle && _replays < _maxReplays) ? _replay : null,
+                onReplay: (idle && _replays < _maxReplays) ? _replay : null,
                 replayLabel: '${widget.replayLabel} ($_replays/$_maxReplays)',
               ),
             ],
@@ -539,7 +575,8 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
                   fontWeight: FontWeight.w900, color: const Color(0xff1565c0))),
         ),
         const Center(
-            child: Text('accuracy', style: TextStyle(color: const Color(0xff94a3b8)))),
+            child: Text('accuracy',
+                style: TextStyle(color: Color(0xff94a3b8)))),
         const SizedBox(height: 12),
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
@@ -567,7 +604,8 @@ class _IntervalTaskPageState extends State<IntervalTaskPage> {
         ],
         const SizedBox(height: 12),
         Text(widget.researchNote,
-            style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8))),
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: const Color(0xff94a3b8))),
         const SizedBox(height: 20),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_session),
@@ -609,7 +647,7 @@ class _TransportPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -835,7 +873,7 @@ class _IntervalButton extends StatelessWidget {
           boxShadow: onActive
               ? [
                   BoxShadow(
-                    color: const Color(0xff3b82f6).withOpacity(0.4),
+                    color: const Color(0xff3b82f6).withValues(alpha: 0.4),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -902,7 +940,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),

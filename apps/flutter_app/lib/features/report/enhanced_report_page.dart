@@ -7,8 +7,8 @@ import 'package:intl/intl.dart';
 
 import 'report_printer_io.dart'
     if (dart.library.js_interop) 'report_printer_web.dart' as printer;
-import 'pdf_saver_io.dart'
-    if (dart.library.js_interop) 'pdf_saver_web.dart' as pdf_saver;
+import 'pdf_saver_io.dart' if (dart.library.js_interop) 'pdf_saver_web.dart'
+    as pdf_saver;
 
 import 'confusion_matrix_page.dart';
 import 'staircase_plot.dart';
@@ -226,7 +226,8 @@ List<String> reportRecommendations(List<ReportTest> tests) {
   final affected = affectedProfiles(tests);
   final recs = <String>[];
   if (affected.contains(BuffaloProfile.auditoryDecoding)) {
-    recs.add('Phonemic training recommended — structured phoneme-discrimination '
+    recs.add(
+        'Phonemic training recommended — structured phoneme-discrimination '
         'and auditory-closure practice.');
   }
   if (affected.contains(BuffaloProfile.toleranceFadingMemory)) {
@@ -275,6 +276,7 @@ class EnhancedReportPage extends StatelessWidget {
     this.sessionCount = 0,
     this.confusionMatrix,
     this.confusionSessionCount = 0,
+    this.embedded = false,
   });
 
   final String patientName;
@@ -304,6 +306,9 @@ class EnhancedReportPage extends StatelessWidget {
 
   /// Number of stored sessions contributing to [confusionMatrix].
   final int confusionSessionCount;
+
+  /// Removes the page scaffold/app bar when shown inside the Report center.
+  final bool embedded;
 
   static const Color _paper = Color(0xfff8fafc);
   static const Color _panel = Color(0xffeef2f7);
@@ -340,8 +345,8 @@ class EnhancedReportPage extends StatelessWidget {
     }
     b.writeln('');
     b.writeln('Narrative');
-    b.writeln(
-        generateNarrativeReport(narrativeInput ?? _demoNarrativeInput).paragraph);
+    b.writeln(generateNarrativeReport(narrativeInput ?? _demoNarrativeInput)
+        .paragraph);
     if (demo) b.writeln('(Demonstration data.)');
     b.writeln('');
     b.writeln('Disclaimer: Research measurement only — not a clinical '
@@ -467,8 +472,8 @@ class EnhancedReportPage extends StatelessWidget {
     final messenger = ScaffoldMessenger.of(context);
     final stamp = DateFormat('yyyyMMdd-HHmm').format(date ?? DateTime.now());
     try {
-      final path =
-          await pdf_saver.savePdf(reportPdfBytes(), 'hearbloom-report-$stamp.pdf');
+      final path = await pdf_saver.savePdf(
+          reportPdfBytes(), 'hearbloom-report-$stamp.pdf');
       messenger.showSnackBar(SnackBar(
         content: Text(path == null
             ? 'Report PDF downloaded.'
@@ -483,6 +488,100 @@ class EnhancedReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final body = Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Column(
+            children: [
+              _actionRow(context),
+              const SizedBox(height: 14),
+              Container(
+                key: const Key('report-paper'),
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  color: _paper,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _header(),
+                    const SizedBox(height: 18),
+                    if (demo) ...[
+                      _demoBanner(),
+                      const SizedBox(height: 14),
+                    ],
+                    _patientSection(),
+                    const SizedBox(height: 22),
+                    _sectionTitle('Test Results'),
+                    const SizedBox(height: 8),
+                    if (!demo && sessionCount > 0) ...[
+                      Text(
+                        'Latest result per test, from $sessionCount stored '
+                        'session${sessionCount == 1 ? '' : 's'} on this '
+                        'device.',
+                        style: const TextStyle(color: _muted, fontSize: 12),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    _resultsTable(),
+                    const SizedBox(height: 22),
+                    _sectionTitle('CAPD Profile — Buffalo Model'),
+                    const SizedBox(height: 8),
+                    _profileSection(),
+                    const SizedBox(height: 22),
+                    _sectionTitle('Recommendations'),
+                    const SizedBox(height: 8),
+                    for (final r in reportRecommendations(tests)) _bullet(r),
+                    if (demo || confusionMatrix != null) ...[
+                      const SizedBox(height: 22),
+                      _sectionTitle('Response Confusion Matrix'),
+                      const SizedBox(height: 8),
+                      _confusionSection(),
+                      const SizedBox(height: 22),
+                      _sectionTitle('Phoneme Feature Analysis'),
+                      const SizedBox(height: 8),
+                      _phonemeSection(),
+                    ],
+                    const SizedBox(height: 22),
+                    _sectionTitle('Auto-Generated Narrative'),
+                    const SizedBox(height: 8),
+                    _narrativeSection(),
+                    if (demo || staircase != null) ...[
+                      const SizedBox(height: 22),
+                      _sectionTitle('Adaptive Staircase Trajectory'),
+                      const SizedBox(height: 8),
+                      _staircaseSection(),
+                    ],
+                    if (!demo && _fit != null) ...[
+                      const SizedBox(height: 22),
+                      _sectionTitle('Psychometric Function Fit'),
+                      const SizedBox(height: 8),
+                      _fitSection(),
+                    ],
+                    const SizedBox(height: 18),
+                    const Divider(color: _line),
+                    const SizedBox(height: 8),
+                    _disclaimer(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (embedded) return body;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Report'),
@@ -509,100 +608,7 @@ class EnhancedReportPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Column(
-              children: [
-                _actionRow(context),
-                const SizedBox(height: 14),
-                Container(
-                  key: const Key('report-paper'),
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: _paper,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _header(),
-                      const SizedBox(height: 18),
-                      if (demo) ...[
-                        _demoBanner(),
-                        const SizedBox(height: 14),
-                      ],
-                      _patientSection(),
-                      const SizedBox(height: 22),
-                      _sectionTitle('Test Results'),
-                      const SizedBox(height: 8),
-                      if (!demo && sessionCount > 0) ...[
-                        Text(
-                          'Latest result per test, from $sessionCount stored '
-                          'session${sessionCount == 1 ? '' : 's'} on this '
-                          'device.',
-                          style: const TextStyle(color: _muted, fontSize: 12),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      _resultsTable(),
-                      const SizedBox(height: 22),
-                      _sectionTitle('CAPD Profile — Buffalo Model'),
-                      const SizedBox(height: 8),
-                      _profileSection(),
-                      const SizedBox(height: 22),
-                      _sectionTitle('Recommendations'),
-                      const SizedBox(height: 8),
-                      for (final r in reportRecommendations(tests))
-                        _bullet(r),
-                      if (demo || confusionMatrix != null) ...[
-                        const SizedBox(height: 22),
-                        _sectionTitle('Response Confusion Matrix'),
-                        const SizedBox(height: 8),
-                        _confusionSection(),
-                        const SizedBox(height: 22),
-                        _sectionTitle('Phoneme Feature Analysis'),
-                        const SizedBox(height: 8),
-                        _phonemeSection(),
-                      ],
-                      const SizedBox(height: 22),
-                      _sectionTitle('Auto-Generated Narrative'),
-                      const SizedBox(height: 8),
-                      _narrativeSection(),
-                      if (demo || staircase != null) ...[
-                        const SizedBox(height: 22),
-                        _sectionTitle('Adaptive Staircase Trajectory'),
-                        const SizedBox(height: 8),
-                        _staircaseSection(),
-                      ],
-                      if (!demo && _fit != null) ...[
-                        const SizedBox(height: 22),
-                        _sectionTitle('Psychometric Function Fit'),
-                        const SizedBox(height: 8),
-                        _fitSection(),
-                      ],
-                      const SizedBox(height: 18),
-                      const Divider(color: _line),
-                      const SizedBox(height: 8),
-                      _disclaimer(),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
+      body: body,
     );
   }
 
@@ -876,11 +882,10 @@ class EnhancedReportPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('•  ',
-                style:
-                    TextStyle(color: _ink, fontWeight: FontWeight.w700)),
+                style: TextStyle(color: _ink, fontWeight: FontWeight.w700)),
             Expanded(
-              child: Text(text,
-                  style: const TextStyle(color: _ink, height: 1.4)),
+              child:
+                  Text(text, style: const TextStyle(color: _ink, height: 1.4)),
             ),
           ],
         ),
@@ -917,8 +922,7 @@ class EnhancedReportPage extends StatelessWidget {
             'Rows are the presented item; columns are the response. The '
             'diagonal is correct; off-diagonal cells are confusions '
             '($_confusionSourceNote).',
-            style:
-                const TextStyle(color: _muted, fontSize: 11.5, height: 1.35),
+            style: const TextStyle(color: _muted, fontSize: 11.5, height: 1.35),
           ),
         ],
       ),
@@ -959,7 +963,8 @@ class EnhancedReportPage extends StatelessWidget {
                   height: 1.4,
                   fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
-          row('Voicing errors', analysis.percentFor(PhonemeFeatureError.voicing)),
+          row('Voicing errors',
+              analysis.percentFor(PhonemeFeatureError.voicing)),
           row('Place-of-articulation errors',
               analysis.percentFor(PhonemeFeatureError.place)),
           row('Manner-of-articulation errors',
@@ -968,8 +973,7 @@ class EnhancedReportPage extends StatelessWidget {
           Text(
             'Errors are classified by the single distinctive feature that '
             'changed ($_confusionSourceNote).',
-            style:
-                const TextStyle(color: _muted, fontSize: 11.5, height: 1.35),
+            style: const TextStyle(color: _muted, fontSize: 11.5, height: 1.35),
           ),
         ],
       ),
@@ -1049,7 +1053,22 @@ class EnhancedReportPage extends StatelessWidget {
             )
           : const StaircasePlot(
               values: <double>[
-                12, 10, 8, 6, 8, 6, 4, 6, 4, 2, 4, 2, 3, 2, 3, 2
+                12,
+                10,
+                8,
+                6,
+                8,
+                6,
+                4,
+                6,
+                4,
+                2,
+                4,
+                2,
+                3,
+                2,
+                3,
+                2
               ],
               reversalIndices: <int>[4, 6, 9, 11, 12, 13, 14, 15],
               threshold: 2.5,
@@ -1067,8 +1086,7 @@ class EnhancedReportPage extends StatelessWidget {
     if (run == null || run.correct == null || run.chanceLevel == null) {
       return null;
     }
-    return fitLogistic(run.values, run.correct!,
-        guessRate: run.chanceLevel!);
+    return fitLogistic(run.values, run.correct!, guessRate: run.chanceLevel!);
   }
 
   Widget _fitSection() {

@@ -14,6 +14,7 @@ import '../../core/protocol_engine.dart';
 import '../../core/speech_in_noise.dart';
 import '../catalog/validation_badge.dart';
 import '../common/level_meter.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Demonstration word pool for the 4AFC renderer. These are placeholder labels;
@@ -122,6 +123,9 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
   Timer? _autoPlayTimer;
   final List<bool> _results = <bool>[];
 
+  /// The exact presented buffer (for wrong-answer replays).
+  Uint8List? _lastWav;
+
   // Presentation-only stimulus level meter data (last mixed buffer).
   List<double> _envelope = const <double>[];
   Duration _stimDuration = Duration.zero;
@@ -162,6 +166,7 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
       _played = false;
       _chosenIndex = null;
       _lastCorrect = null;
+      _lastWav = null;
     });
     _scheduleAutoPlay();
   }
@@ -172,7 +177,7 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
   /// stays available as a first-trial fallback for browser autoplay policies.
   void _scheduleAutoPlay() {
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer(const Duration(seconds: 2), () {
+    _autoPlayTimer = Timer(kTrialPrePlayDelay, () {
       if (mounted && !_played) _play();
     });
   }
@@ -203,15 +208,17 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
       );
       // SAFETY: adapt SNR only; peak-normalized mix never boosts master volume.
       final mixed = mixAtSnr(voiced, noise, _session.currentSnrDb);
+      final wav = encodeWav16(mixed, sampleRate: speech.sampleRate);
+      _lastWav = wav; // exact bytes for wrong-answer replays
       if (mounted) {
         setState(() {
           _envelope = levelEnvelope(mixed);
-          _stimDuration = Duration(
-              milliseconds: mixed.length * 1000 ~/ speech.sampleRate);
+          _stimDuration =
+              Duration(milliseconds: mixed.length * 1000 ~/ speech.sampleRate);
           _playToken++;
         });
       }
-      await _audio.playWav(encodeWav16(mixed, sampleRate: speech.sampleRate));
+      await _audio.playWav(wav);
     } catch (_) {
       // Asset missing (e.g. placeholder pool in tests) or playback failure:
       // do not block the exercise.
@@ -235,11 +242,36 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
       _lastCorrect = correct;
       _results.add(correct);
     });
-    // Show feedback briefly, then auto-advance. The Next button stays as an
-    // immediate manual override. Cancelled on dispose / manual advance / stop
-    // so no timer leaks past the widget's lifetime.
+    // Hands-free flow: in training a wrong answer re-plays the word twice
+    // before moving on; otherwise a short feedback beat, then auto-advance.
+    // The Next button stays as an immediate manual override.
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1500), () {
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosenIndex != null) _advance();
+      });
+    }
+  }
+
+  /// Wrong-answer sequence: replay the exact presented buffer twice, a brief
+  /// beat, then advance automatically.
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosenIndex == null) return;
+    // Cancellable beat before advancing (a raw Future.delayed would leak a
+    // timer past dispose).
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosenIndex != null) _advance();
     });
   }
@@ -314,8 +346,7 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
             text: 'Level: ${widget.difficulty.label}'),
         if (_variesVoice)
           MetaPill(
-              icon: Icons.record_voice_over,
-              text: '${_voice.label} (proxy)'),
+              icon: Icons.record_voice_over, text: '${_voice.label} (proxy)'),
         if (_envelope.isNotEmpty)
           StimulusLevelMeter(
             envelope: _envelope,
@@ -464,7 +495,8 @@ class _SpeechInNoisePageState extends State<SpeechInNoisePage> {
         Text(
           'Research measurement only. This is not a diagnosis and not a dB HL '
           'threshold.',
-          style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8)),
+          style: theme.textTheme.bodySmall
+              ?.copyWith(color: const Color(0xff94a3b8)),
         ),
         const SizedBox(height: 20),
         FilledButton(
@@ -571,7 +603,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),

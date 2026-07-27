@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/protocol_stage.dart';
 import '../catalog/validation_badge.dart';
 
-/// Presents the first two workflow stages — Introduction and Preview — for any
-/// protocol, then hands off to the renderer (Training → Test → Results) via
-/// [onStart]. Progress through the five stages is driven by the deterministic
-/// [ProtocolStageController]; the full stage strip is always shown so the user
-/// sees where they are in the workflow.
+/// Introduction and familiarisation preview shown before a listening task.
+///
+/// Both stages are optional. A listener who already knows the task can start
+/// immediately without stepping through the introduction.
 class ProtocolIntroScreen extends StatefulWidget {
   const ProtocolIntroScreen({
     super.key,
@@ -22,8 +21,6 @@ class ProtocolIntroScreen extends StatefulWidget {
   final String description;
   final String exampleText;
   final String validationStatus;
-
-  /// Invoked when the user finishes Preview and begins Training.
   final VoidCallback onStart;
 
   @override
@@ -31,7 +28,6 @@ class ProtocolIntroScreen extends StatefulWidget {
 }
 
 class _ProtocolIntroScreenState extends State<ProtocolIntroScreen> {
-  // This screen owns the first two stages; the renderer owns the rest.
   final ProtocolStageController _controller = ProtocolStageController(
     stages: const [ProtocolStage.introduction, ProtocolStage.preview],
   );
@@ -51,56 +47,103 @@ class _ProtocolIntroScreenState extends State<ProtocolIntroScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(12),
-            child: Chip(label: Text('RESEARCH ONLY')),
+        actions: [
+          TextButton.icon(
+            key: const Key('protocol-intro-skip'),
+            onPressed: widget.onStart,
+            icon: const Icon(Icons.skip_next),
+            label: const Text('Skip to test'),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          _StageStrip(current: _controller.current),
-          const SizedBox(height: 20),
-          Row(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: ListView(
+            padding: const EdgeInsets.all(24),
             children: [
-              Text(
-                protocolStageLabel(_controller.current),
-                style: theme.textTheme.headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.w800),
+              _StageProgress(current: _controller.current),
+              const SizedBox(height: 28),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      isIntro ? Icons.menu_book_outlined : Icons.hearing,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          protocolStageLabel(_controller.current),
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          isIntro
+                              ? 'Understand the task before any audio plays.'
+                              : 'Preview the response format. Nothing is scored.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ValidationBadge(validationStatus: widget.validationStatus),
+                ],
               ),
-              const Spacer(),
-              ValidationBadge(validationStatus: widget.validationStatus),
+              const SizedBox(height: 20),
+              if (isIntro) ...[
+                Text(
+                  widget.description,
+                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+                ),
+                const SizedBox(height: 18),
+                const _ResearchNotice(),
+              ] else
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: Text(
+                    widget.exampleText,
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+                  ),
+                ),
+              const SizedBox(height: 26),
+              FilledButton.icon(
+                onPressed: _next,
+                icon: Icon(
+                    isIntro ? Icons.visibility_outlined : Icons.play_arrow),
+                label: Text(isIntro ? 'See an example' : 'Begin training'),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: widget.onStart,
+                child: const Text('I know this task - start now'),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          if (isIntro) ...[
-            Text(widget.description, style: theme.textTheme.bodyLarge),
-            const SizedBox(height: 16),
-            const _ResearchNotice(),
-          ] else ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xffeaf3ff),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(widget.exampleText, style: theme.textTheme.bodyLarge),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'This is a preview for familiarisation — nothing is scored.',
-              style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8)),
-            ),
-          ],
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: _next,
-            icon: Icon(isIntro ? Icons.visibility_outlined : Icons.play_arrow),
-            label: Text(isIntro ? 'See an example' : 'Begin training'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -111,22 +154,27 @@ class _ResearchNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xfffdf0dc),
-        borderRadius: BorderRadius.circular(12),
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, color: Color(0xff8a5300)),
-          SizedBox(width: 10),
+          Icon(Icons.info_outline, color: theme.colorScheme.primary),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Research exercise only — not a diagnosis and not a dB HL '
+              'Research exercise only - not a diagnosis and not a dB HL '
               'measurement. You can stop at any time; fatigue is not failure.',
-              style: TextStyle(color: Color(0xff8a5300)),
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -135,80 +183,51 @@ class _ResearchNotice extends StatelessWidget {
   }
 }
 
-/// Horizontal strip showing all five workflow stages with the current one
-/// highlighted.
-class _StageStrip extends StatelessWidget {
-  const _StageStrip({required this.current});
+class _StageProgress extends StatelessWidget {
+  const _StageProgress({required this.current});
 
   final ProtocolStage current;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
     const stages = ProtocolStage.values;
     final currentIndex = stages.indexOf(current);
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i < stages.length; i++)
-          _StageChip(
-            label: protocolStageLabel(stages[i]),
-            index: i,
-            done: i < currentIndex,
-            active: i == currentIndex,
-            primary: primary,
-          ),
+        LinearProgressIndicator(
+          value: (currentIndex + 1) / stages.length,
+          minHeight: 6,
+          borderRadius: BorderRadius.circular(3),
+        ),
+        const SizedBox(height: 9),
+        Row(
+          children: [
+            for (var i = 0; i < stages.length; i++)
+              Expanded(
+                child: Text(
+                  protocolStageLabel(stages[i]),
+                  textAlign: i == 0
+                      ? TextAlign.left
+                      : i == stages.length - 1
+                          ? TextAlign.right
+                          : TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight:
+                        i == currentIndex ? FontWeight.w800 : FontWeight.w600,
+                    color: i <= currentIndex
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ],
-    );
-  }
-}
-
-class _StageChip extends StatelessWidget {
-  const _StageChip({
-    required this.label,
-    required this.index,
-    required this.done,
-    required this.active,
-    required this.primary,
-  });
-
-  final String label;
-  final int index;
-  final bool done;
-  final bool active;
-  final Color primary;
-
-  @override
-  Widget build(BuildContext context) {
-    const good = Color(0xff1b7f4b);
-    final Color bg = active
-        ? primary
-        : (done ? const Color(0x3322c55e) : const Color(0xff293548));
-    final Color fg = active ? Colors.white : (done ? good : const Color(0xff94a3b8));
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: active ? Colors.transparent : const Color(0x33ffffff)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (done)
-            const Icon(Icons.check, size: 12, color: good)
-          else
-            Text('${index + 1}',
-                style: TextStyle(
-                    fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
-          const SizedBox(width: 4),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w700, color: fg)),
-        ],
-      ),
     );
   }
 }

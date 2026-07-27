@@ -58,10 +58,7 @@ void main() {
       expect(FisherChecklist.items.length, 25);
       expect(FisherChecklist.score(<int>{}), 100);
       expect(FisherChecklist.score({0, 1, 2, 3, 4}), 80);
-      expect(
-          FisherChecklist.score(
-              {for (var i = 0; i < 25; i++) i}),
-          0);
+      expect(FisherChecklist.score({for (var i = 0; i < 25; i++) i}), 0);
     });
   });
 
@@ -165,7 +162,9 @@ void main() {
       await tester.tap(find.byKey(const Key('pattern-mode-hum')));
       await tester.pumpAndSettle();
       // Trial page in hum mode: reveal, then score both trials as matched.
+      // Each trial's audio auto-plays after the 1.2 s breathing room.
       for (var i = 0; i < 2; i++) {
+        await tester.pump(const Duration(milliseconds: 1300));
         expect(find.byKey(const Key('pattern-hum-reveal')), findsOneWidget);
         await tester.tap(find.byKey(const Key('pattern-hum-reveal')));
         await tester.pump();
@@ -211,9 +210,9 @@ void main() {
   });
 
   group('Binaural JND page', () {
-    testWidgets('2-interval choice gives feedback and adapts',
-        (tester) async {
+    testWidgets('2-interval choice gives feedback and adapts', (tester) async {
       await tester.pumpWidget(_app(const BinauralJndPage(mode: 'itd')));
+      await tester.pump(const Duration(milliseconds: 1300));
       await tester.pump();
       expect(find.textContaining('ITD'), findsWidgets);
       expect(find.text('Sound 1'), findsOneWidget);
@@ -231,8 +230,7 @@ void main() {
   });
 
   group('Figure-ground page', () {
-    testWidgets('starts in the +8 dB block with a voice pill',
-        (tester) async {
+    testWidgets('starts in the +8 dB block with a voice pill', (tester) async {
       await tester.pumpWidget(_app(FigureGroundPage(comfortableLevel: 0.4)));
       await tester.pump();
       expect(find.textContaining('Block SNR +8'), findsOneWidget);
@@ -252,10 +250,10 @@ void main() {
   });
 
   group('Trial scaffold H6/H11', () {
-    testWidgets('caption appears only with the setting on and help sheet '
+    testWidgets(
+        'caption appears only with the setting on and help sheet '
         'is consistent', (tester) async {
-      appSettings.value =
-          appSettings.value.copyWith(showStimulusText: false);
+      appSettings.value = appSettings.value.copyWith(showStimulusText: false);
       Widget scaffold() => _app(TrialScaffold(
             title: 'Demo task',
             instruction: 'Listen and answer.',
@@ -279,8 +277,7 @@ void main() {
       expect(find.textContaining('Controls (same on every exercise)'),
           findsOneWidget);
       expect(find.textContaining('Measures demo things.'), findsOneWidget);
-      appSettings.value =
-          appSettings.value.copyWith(showStimulusText: false);
+      appSettings.value = appSettings.value.copyWith(showStimulusText: false);
     });
   });
 
@@ -297,7 +294,8 @@ void main() {
       expect(find.text('92'), findsOneWidget);
     });
 
-    testWidgets('APHAB renders all 24 items and disables submit until '
+    testWidgets(
+        'APHAB renders all 24 items and disables submit until '
         'complete', (tester) async {
       await tester.pumpWidget(_app(const AphabPage()));
       expect(find.textContaining('Abbreviated Profile'), findsOneWidget);
@@ -305,8 +303,8 @@ void main() {
       await tester.pump();
       await tester.scrollUntilVisible(
           find.byKey(const Key('aphab-see-result')), 600);
-      final button = tester.widget<FilledButton>(
-          find.byKey(const Key('aphab-see-result')));
+      final button = tester
+          .widget<FilledButton>(find.byKey(const Key('aphab-see-result')));
       expect(button.onPressed, isNull); // 23 items still unanswered
     });
   });

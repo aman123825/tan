@@ -7,6 +7,7 @@ import '../../core/audio/pattern_synth.dart';
 import '../../core/difficulty.dart';
 import '../../core/pattern_test.dart';
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Duration Pattern Test or Frequency Pattern Test page.
@@ -82,8 +83,9 @@ class _PatternTestPageState extends State<PatternTestPage> {
   List<String> get _choices =>
       widget.testType == 'dpt' ? kDptPatterns : kFptPatterns;
 
-  String get _title =>
-      widget.testType == 'dpt' ? 'Duration Pattern Test' : 'Frequency Pattern Test';
+  String get _title => widget.testType == 'dpt'
+      ? 'Duration Pattern Test'
+      : 'Frequency Pattern Test';
 
   String get _instruction {
     if (_isHum) {
@@ -142,7 +144,11 @@ class _PatternTestPageState extends State<PatternTestPage> {
       _revealed = false;
       _replays = 0;
     });
-    _play();
+    // Short breathing room, then the new pattern auto-plays.
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialPrePlayDelay, () {
+      if (mounted && !_finished && _chosen == null) _play();
+    });
   }
 
   Future<void> _play() async {
@@ -169,9 +175,39 @@ class _PatternTestPageState extends State<PatternTestPage> {
       _lastCorrect = correct;
       _results.add(correct);
     });
-    // Show feedback briefly, then auto-advance; Next remains a manual override.
+    // Hands-free flow: a wrong answer re-plays the pattern twice before the
+    // next question; a correct answer moves on after a short feedback beat.
+    // Next remains a manual override.
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1500), () {
+    if (!correct) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
+  }
+
+  /// Wrong-answer sequence: replay the presented pattern twice (the synth is
+  /// deterministic per trial), a brief beat, then advance automatically.
+  Future<void> _replayFailThenAdvance() async {
+    final trial = _current;
+    for (var i = 0; i < 2 && trial != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        final samples = widget.testType == 'dpt'
+            ? synthesizeDpt(trial.pattern)
+            : synthesizeFpt(trial.pattern);
+        await _audio.playWav(encodeMonauralWav(samples, ear: trial.ear));
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosen == null) return;
+    // Cancellable beat before advancing (a raw Future.delayed would leak a
+    // timer past dispose).
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosen != null) _advance();
     });
   }
@@ -194,9 +230,13 @@ class _PatternTestPageState extends State<PatternTestPage> {
       _results.add(matched);
     });
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 900), () {
-      if (mounted && !_finished && _chosen != null) _advance();
-    });
+    if (!matched) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
   }
 
   void _advance() {
@@ -259,7 +299,8 @@ class _PatternTestPageState extends State<PatternTestPage> {
         ),
         MetaPill(
           icon: _isHum ? Icons.music_note : Icons.signal_cellular_alt,
-          text: _isHum ? 'Hummed response' : 'Level: ${widget.difficulty.label}',
+          text:
+              _isHum ? 'Hummed response' : 'Level: ${widget.difficulty.label}',
         ),
       ],
       transport: [
@@ -273,7 +314,8 @@ class _PatternTestPageState extends State<PatternTestPage> {
           icon: Icons.replay,
           label: 'Replay ($_replays/$_maxReplays)',
           color: TransportColors.replay,
-          onTap: (_played && !answered && _replays < _maxReplays) ? _play : null,
+          onTap:
+              (_played && !answered && _replays < _maxReplays) ? _play : null,
         ),
         TransportAction(
           icon: Icons.stop,
@@ -282,7 +324,8 @@ class _PatternTestPageState extends State<PatternTestPage> {
           onTap: _finish,
         ),
       ],
-      statusLeft: 'Question ${_session!.trialNumber} of ${_session!.totalTrials}',
+      statusLeft:
+          'Question ${_session!.trialNumber} of ${_session!.totalTrials}',
       statusRight: 'Elapsed Time ${_fmt(_sw.elapsed)}',
       onStop: _finish,
       footer: answered && !_isHum ? _feedbackFooter() : null,

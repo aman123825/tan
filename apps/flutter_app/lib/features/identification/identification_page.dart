@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../core/audio/audio_port.dart';
 import '../../core/identification.dart';
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 import '../common/trial_scaffold.dart';
 
 /// Provides the WAV bytes to play for the [target] on a given [trialIndex]
@@ -78,6 +79,7 @@ class _IdentificationPageState extends State<IdentificationPage> {
   bool _finished = false;
   Timer? _autoAdvanceTimer;
   Timer? _autoPlayTimer;
+  Uint8List? _lastWav;
 
   int get _levelPercent => (widget.comfortableLevel * 100).round();
 
@@ -111,6 +113,7 @@ class _IdentificationPageState extends State<IdentificationPage> {
       _played = false;
       _chosen = null;
       _lastCorrect = null;
+      _lastWav = null;
     });
     _scheduleAutoPlay();
   }
@@ -120,7 +123,7 @@ class _IdentificationPageState extends State<IdentificationPage> {
   /// played; the Play button remains a first-trial fallback.
   void _scheduleAutoPlay() {
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer(const Duration(seconds: 2), () {
+    _autoPlayTimer = Timer(kTrialPrePlayDelay, () {
       if (mounted && !_played) _play();
     });
   }
@@ -136,9 +139,10 @@ class _IdentificationPageState extends State<IdentificationPage> {
       }
     });
     try {
-      final bytes =
+      final wav =
           await widget.audioProvider(trial.target, _session.completedTrials);
-      await _audio.playWav(bytes);
+      _lastWav = wav;
+      await _audio.playWav(wav);
     } catch (_) {
       // Synthesis/asset failure must not block the exercise.
     }
@@ -160,15 +164,36 @@ class _IdentificationPageState extends State<IdentificationPage> {
       _chosen = index;
       _lastCorrect = correct;
     });
-    // Show feedback briefly, then auto-advance; Next remains a manual override.
     _autoAdvanceTimer?.cancel();
-    _autoAdvanceTimer = Timer(const Duration(milliseconds: 1500), () {
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
+  }
+
+  Future<void> _replayFailThenAdvance() async {
+    final wav = _lastWav;
+    for (var i = 0; i < 2 && wav != null; i++) {
+      if (!mounted || _finished) return;
+      try {
+        await _audio.playWav(wav);
+      } catch (_) {
+        break;
+      }
+    }
+    if (!mounted || _finished || _chosen == null) return;
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
       if (mounted && !_finished && _chosen != null) _advance();
     });
   }
 
   void _advance() {
     _autoAdvanceTimer?.cancel();
+    _autoPlayTimer?.cancel();
     if (_session.isComplete) {
       _finish();
     } else {
@@ -179,6 +204,7 @@ class _IdentificationPageState extends State<IdentificationPage> {
   void _finish() {
     if (_finished) return;
     _autoAdvanceTimer?.cancel();
+    _autoPlayTimer?.cancel();
     setState(() => _finished = true);
     widget.onCompleted?.call(_session);
   }
@@ -321,7 +347,8 @@ class _IdentificationPageState extends State<IdentificationPage> {
         Text(
             'Research measurement only — not a diagnosis. Synthesized or demo '
             'material, not validated clinical stimuli.',
-            style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8))),
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: const Color(0xff94a3b8))),
         const SizedBox(height: 20),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_session),
@@ -360,8 +387,7 @@ class _ChoiceButton extends StatelessWidget {
         : (switch (state) {
             _ChoiceState.correct => const Color(0x3322c55e),
             _ChoiceState.wrong => const Color(0x33ef4444),
-            _ChoiceState.neutral =>
-              const Color(0xff293548),
+            _ChoiceState.neutral => const Color(0xff293548),
           });
     return Semantics(
       button: true,
@@ -429,7 +455,7 @@ class _FeedbackLine extends StatelessWidget {
         if (!correct) ...[
           const SizedBox(height: 6),
           Text('The correct answer was: $answer',
-              style: const TextStyle(color: const Color(0xff94a3b8))),
+              style: const TextStyle(color: Color(0xff94a3b8))),
         ],
       ],
     );
@@ -449,7 +475,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),

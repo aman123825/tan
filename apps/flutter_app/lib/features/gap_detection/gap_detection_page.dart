@@ -11,6 +11,7 @@ import '../../core/difficulty.dart';
 import '../../core/gap_detection.dart';
 import '../../core/protocol_engine.dart';
 import '../catalog/validation_badge.dart';
+import '../common/trial_flow_timing.dart';
 
 /// Temporal gap-detection 3AFC renderer with real synthesized audio.
 ///
@@ -81,6 +82,8 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
   Uint8List? _lastWav;
   bool _playing = false;
   Timer? _tick;
+  Timer? _prePlayTimer;
+  Timer? _autoAdvanceTimer;
   Duration _elapsed = Duration.zero;
   int _activeInterval = -1;
 
@@ -95,6 +98,8 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
   @override
   void dispose() {
     _tick?.cancel();
+    _prePlayTimer?.cancel();
+    _autoAdvanceTimer?.cancel();
     super.dispose();
   }
 
@@ -108,7 +113,10 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
       _lastCorrect = null;
       _lastWav = null;
     });
-    _present();
+    _prePlayTimer?.cancel();
+    _prePlayTimer = Timer(kTrialPrePlayDelay, () {
+      if (mounted && !_finished && _chosen == null) unawaited(_present());
+    });
   }
 
   Future<void> _present() async {
@@ -216,10 +224,28 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
       _chosen = index;
       _lastCorrect = correct;
     });
-    if (!correct && _session.showsFeedback) _replayOnFail();
+    _autoAdvanceTimer?.cancel();
+    if (!correct && _session.showsFeedback) {
+      unawaited(_replayFailThenAdvance());
+    } else {
+      _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+        if (mounted && !_finished && _chosen != null) _advance();
+      });
+    }
+  }
+
+  Future<void> _replayFailThenAdvance() async {
+    await _replayOnFail();
+    if (!mounted || _finished || _chosen == null) return;
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(kTrialFeedbackDelay, () {
+      if (mounted && !_finished && _chosen != null) _advance();
+    });
   }
 
   void _advance() {
+    _autoAdvanceTimer?.cancel();
+    _prePlayTimer?.cancel();
     if (_session.isComplete) {
       _finish();
     } else {
@@ -229,6 +255,8 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
 
   void _finish() {
     if (_finished) return;
+    _autoAdvanceTimer?.cancel();
+    _prePlayTimer?.cancel();
     setState(() => _finished = true);
     widget.onCompleted?.call(_session);
   }
@@ -349,7 +377,8 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
         ] else if (!_played)
           Text(
             'Play the sequence to enable the choices.',
-            style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8)),
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: const Color(0xff94a3b8)),
             textAlign: TextAlign.center,
           ),
       ],
@@ -396,7 +425,8 @@ class _GapDetectionPageState extends State<GapDetectionPage> {
           'Research measurement only — not a diagnosis and not a dB HL '
           'threshold. Temporal thresholds are wired-headphone recommended and '
           'are not comparable across output devices.',
-          style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xff94a3b8)),
+          style: theme.textTheme.bodySmall
+              ?.copyWith(color: const Color(0xff94a3b8)),
         ),
         const SizedBox(height: 20),
         FilledButton(
@@ -587,7 +617,7 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: const Color(0xff94a3b8))),
+          Text(label, style: const TextStyle(color: Color(0xff94a3b8))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
