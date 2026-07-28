@@ -12,6 +12,10 @@ dependencies:
   fl_chart: ^1.2.0
   intl: ^0.20.3
   google_fonts: ^8.2.0
+  # path_provider_android accepts ^1.0.0. Pin the patched release because
+  # jni 1.0.1 contains a breaking KGP migration and is retracted.
+  jni: 1.0.2
+  jni_flutter: 1.0.2
   cryptography: ^2.7.0
   cupertino_icons: ^1.0.8
 dev_dependencies:
